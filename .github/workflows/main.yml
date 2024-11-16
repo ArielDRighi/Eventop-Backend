@@ -26,10 +26,10 @@ jobs:
       - name: Build and push docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          file: back/eventop/Dockerfile
+          context: ./back/eventop # Asegúrate de que este es el directorio correcto
+          file: ./back/eventop/Dockerfile
           push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}} nestjs-backend-eventop:1.0
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/nestjs-backend-eventop:1.0
 
           ## Deploy to render
 
