@@ -27,7 +27,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: ./Dockerfile 
+          file: back/eventop/Dockerfile
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}} nestjs-backend-eventop:1.0
 
