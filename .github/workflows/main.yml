@@ -12,24 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      ##upload to docker hub
       
-      - name: Set up docker build
-        uses: docker/setup-buildx-action@v1
-
-      - name: Log in to docker hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{secrets.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_TOKEN}}
-
-      - name: Build and push docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: ./back/eventop # Asegúrate de que este es el directorio correcto
-          file: ./back/eventop/Dockerfile
-          push: true
-          tags: ${{secrets.DOCKERHUB_USERNAME}}-damitymo-eventop:1.0
 
           ## Deploy to render
 
