@@ -1,4 +1,4 @@
-name: render-deploy-Eventop-Backend
+name: render-deploy-eventop-backend
 
 on:
   push:
