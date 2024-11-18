@@ -64,4 +64,14 @@ export class AuthController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Post('guardar-usuario')
+  @HttpCode(HttpStatus.CREATED)
+  async guardarUsuario(@Body() user: CreateUserDto) {
+    try {
+      return await this.authService.signUp(user);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
