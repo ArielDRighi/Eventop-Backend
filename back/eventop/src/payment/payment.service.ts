@@ -2,11 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import MercadoPagoConfig, { Preference } from 'mercadopago';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Event } from './entities/events.entity';
-import { EventService } from './events.service';
+import { Event } from '../events/entities/events.entity';
+import { EventService } from '../events/events.service';
 import { Controller, Post, Body } from '@nestjs/common'; // Importa los decoradores necesarios
 import { sendPurchaseEmail } from '@app/config/nodeMailer';
-import { CreateUserDto } from '@app/auth/dto/createUser.dto';
+import { UserService } from '@app/users/users.service';
+import { PaymentDto } from './dto/Payment.dto';
 
 // Agrega credenciales
 const client = new MercadoPagoConfig({
@@ -20,10 +21,15 @@ export class PaymentService {
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
     private readonly eventService: EventService,
+    private readonly userService: UserService,
   ) {}
 
-  async createPreference(eventId: number, user: CreateUserDto) {
+  async createPreference(data: PaymentDto) {
+    const { eventId, email } = data;
     const event = await this.eventService.getEventById(eventId);
+    const user = await this.userService.findOneByEmail(email);
+
+    const name = user.name;
 
     if (!event) {
       throw new NotFoundException(`Event with ID ${eventId} not found`);
@@ -58,7 +64,7 @@ export class PaymentService {
           auto_return: 'approved',
         },
       });
-      await sendPurchaseEmail(user.email, user.name, event.name);
+      await sendPurchaseEmail(email, name, event.name);
       return response.id;
     } catch (error) {
       console.log('Error', error);
@@ -74,9 +80,9 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('create_preference')
-  async createPreference(@Body('eventId') eventId: number, email: CreateUserDto) {
+  async createPreference(@Body() data: PaymentDto) {
     return {
-      preferenceId: await this.paymentService.createPreference(eventId, email),
+      preferenceId: await this.paymentService.createPreference(data),
     };
   }
 }

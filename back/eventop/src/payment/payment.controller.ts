@@ -7,7 +7,6 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { CreateUserDto } from '@app/auth/dto/createUser.dto';
 import { PaymentDto } from './dto/Payment.dto';
 
 @ApiTags('payment')
@@ -25,13 +24,7 @@ export class PaymentController {
   @ApiResponse({ status: 500, description: 'Internal server error.' })
   async createPreference(@Body() data: PaymentDto, @Res() res: Response) {
     try {
-      const eventId = data.eventId;
-      console.log('Event ID:', eventId);
-
-      const preferenceId = await this.paymentService.createPreference(
-        eventId,
-        data,
-      );
+      const preferenceId = await this.paymentService.createPreference(data);
       res.status(201).json({ preferenceId });
     } catch (error) {
       res.status(500).json({ error: error.message });

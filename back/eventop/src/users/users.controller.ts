@@ -109,4 +109,15 @@ export class UserController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Get(':id')
+  async getUserById(@Param('id', ParseIntPipe) userId: number) {
+    try {
+      return await this.userService.findOneUser(userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
