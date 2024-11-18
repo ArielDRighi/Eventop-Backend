@@ -17,8 +17,8 @@ const config = {
   logging: false,
   dropSchema: false,
   ssl:{
-    rejectUnauthorized: false
-  },
+   rejectUnauthorized: false
+   },
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   subscribers: [],
