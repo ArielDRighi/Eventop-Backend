@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { Event } from './entities/events.entity';
 import { EventService } from './events.service';
 import { Controller, Post, Body } from '@nestjs/common'; // Importa los decoradores necesarios
+import { sendPurchaseEmail } from '@app/config/nodeMailer';
+import { CreateUserDto } from '@app/auth/dto/createUser.dto';
 
 // Agrega credenciales
 const client = new MercadoPagoConfig({
@@ -20,13 +22,17 @@ export class PaymentService {
     private readonly eventService: EventService,
   ) {}
 
-  async createPreference(eventId: number) {
+  async createPreference(eventId: number, user: CreateUserDto) {
     const event = await this.eventService.getEventById(eventId);
 
     if (!event) {
       throw new NotFoundException(`Event with ID ${eventId} not found`);
     }
 
+    const unitPrice = Number(event.price);
+    if (isNaN(unitPrice)) {
+      throw new Error('Event price is not a valid number');
+    }
     const preference = new Preference(client);
 
     try {
@@ -34,10 +40,10 @@ export class PaymentService {
         body: {
           items: [
             {
-              title: 'Evento de prueba',
-              description: 'Una prueba',
+              title: event.name,
+              description: event.description,
               quantity: 1,
-              unit_price: 1500,
+              unit_price: Number(event.price),
               id: event.eventId.toString(),
             },
           ],
@@ -52,10 +58,10 @@ export class PaymentService {
           auto_return: 'approved',
         },
       });
+      await sendPurchaseEmail(user.email, user.name, event.name);
       return response.id;
     } catch (error) {
       console.log('Error', error);
-      console.log(error);
 
       throw error;
     }
@@ -68,9 +74,9 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('create_preference')
-  async createPreference(@Body('eventId') eventId: number) {
+  async createPreference(@Body('eventId') eventId: number, email: CreateUserDto) {
     return {
-      preferenceId: await this.paymentService.createPreference(eventId),
+      preferenceId: await this.paymentService.createPreference(eventId, email),
     };
   }
 }
