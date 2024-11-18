@@ -23,7 +23,7 @@ export class User {
   @Column({ type: 'varchar', length: 50, default: 'local' })
   authProvider: string;
 
-  @Column({ type: 'enum', enum: Role, default: 'guest' })
+  @Column({ type: 'enum', enum: Role, default: 'user' })
   role: Role;
 
   @Column({ type: 'varchar', length: 10, default: 'SPA' })
