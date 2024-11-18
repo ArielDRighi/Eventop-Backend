@@ -7,6 +7,7 @@ import { EventsModule } from './events/events.module';
 import { CategoriesModule } from './categories/categories.module';
 import { LocationsModule } from './locations/locations.module';
 import TypeOrmConfig from './config/typeorm';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import TypeOrmConfig from './config/typeorm';
     EventsModule,
     CategoriesModule,
     LocationsModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [],

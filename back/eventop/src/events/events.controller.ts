@@ -16,14 +16,13 @@ import {
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/CreateEvent.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApiBearerAuth, ApiConsumes, ApiTags, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '@app/decorators/roles.decorator';
 import { Role } from '@app/auth/enum/roles.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from '@app/auth/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from './cloudinary.service';
-import { create } from 'domain';
 
 @ApiTags('events')
 @ApiBearerAuth('access-token')
