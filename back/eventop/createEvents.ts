@@ -7,7 +7,7 @@ const events = [
     name: 'Concert',
     description: 'A live music concert',
     date: '2023-12-01',
-    price: 1050,
+    price: 0,
     currency: 'ARS',
     locationId: 1,
     categoryId: 1,
@@ -22,8 +22,7 @@ const events = [
     currency: 'ARS',
     locationId: 2,
     categoryId: 2,
-    imageUrl:
-      'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626373/qnbuz5de1qowwzyxcgz4.jpg',
+    imageUrl: '',
   },
   {
     name: 'Food Festival',
@@ -83,7 +82,7 @@ const events = [
     name: 'Science Fair',
     description: 'Discover amazing science projects and experiments',
     date: '2023-12-27',
-    price: 6000,
+    price: 0,
     currency: 'ARS',
     locationId: 3,
     categoryId: 2,
