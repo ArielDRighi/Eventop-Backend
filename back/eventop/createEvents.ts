@@ -8,8 +8,8 @@ const events = [
     name: 'Concert',
     description: 'A live music concert',
     date: '2023-12-01',
-    price: 5000,
-    currency: 'USD',
+    price: 50,
+    currency: 'ARS',
     locationId: 1,
     categoryId: 1,
     imageUrl:
@@ -19,8 +19,8 @@ const events = [
     name: 'Art Exhibition',
     description: 'Explore the latest in contemporary art',
     date: '2023-12-05',
-    price: 30,
-    currency: 'USD',
+    price: 0,
+    currency: 'ARS',
     locationId: 2,
     categoryId: 2,
     imageUrl:
@@ -31,18 +31,17 @@ const events = [
     description: 'Taste a variety of cuisines from around the world',
     date: '2023-12-10',
     price: 20,
-    currency: 'USD',
+    currency: 'ARS',
     locationId: 3,
     categoryId: 3,
-    imageUrl:
-      'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626344/cdz3l0bxhvcyobrlcb3a.jpg',
+    imageUrl: '',
   },
   {
     name: 'Tech Conference',
     description: 'Latest trends and innovations in tech',
     date: '2023-12-15',
     price: 150,
-    currency: 'USD',
+    currency: 'ARS',
     locationId: 4,
     categoryId: 4,
     imageUrl:
@@ -52,8 +51,8 @@ const events = [
     name: 'Comedy Show',
     description: 'Laugh out loud with top comedians',
     date: '2023-12-18',
-    price: 40,
-    currency: 'USD',
+    price: 400,
+    currency: 'ARS',
     locationId: 5,
     categoryId: 5,
     imageUrl:
@@ -63,8 +62,8 @@ const events = [
     name: 'Dance Performance',
     description: 'Experience a mesmerizing dance performance',
     date: '2023-12-20',
-    price: 45,
-    currency: 'USD',
+    price: 450,
+    currency: 'ARS',
     locationId: 3,
     categoryId: 2,
     imageUrl:
@@ -75,7 +74,7 @@ const events = [
     description: 'Watch an exclusive film screening',
     date: '2023-12-25',
     price: 15,
-    currency: 'USD',
+    currency: 'ARS',
     locationId: 1,
     categoryId: 2,
     imageUrl:
@@ -86,7 +85,7 @@ const events = [
     description: 'Discover amazing science projects and experiments',
     date: '2023-12-27',
     price: 10,
-    currency: 'USD',
+    currency: 'ARS',
     locationId: 3,
     categoryId: 2,
     imageUrl:
@@ -97,7 +96,7 @@ const events = [
     description: 'Meet authors and attend literary sessions',
     date: '2023-12-28',
     price: 25,
-    currency: 'USD',
+    currency: 'ARS',
     locationId: 2,
     categoryId: 1,
     imageUrl:
@@ -108,7 +107,7 @@ const events = [
     description: 'Support a cause at a beautiful gala event',
     date: '2023-12-30',
     price: 100,
-    currency: 'USD',
+    currency: 'ARS',
     locationId: 4,
     categoryId: 3,
     imageUrl:
