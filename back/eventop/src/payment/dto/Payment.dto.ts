@@ -3,11 +3,11 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class PaymentDto {
   @ApiProperty({
-    type: Number,
+    type: String,
     description: 'The ID of the event',
     required: true,
   })
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
   eventId: number;
 
