@@ -133,4 +133,26 @@ export class EventService {
       throw new HttpException('Failed to delete event', HttpStatus.BAD_REQUEST);
     }
   }
+
+  async updateEventImage(eventId: number, imageUrl: string): Promise<Event> {
+    const event = await this.eventRepository.findOne({ where: { eventId } });
+
+    if (!event) {
+      throw new HttpException(
+        `Event with ID ${eventId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    event.imageUrl = imageUrl;
+
+    try {
+      return await this.eventRepository.save(event);
+    } catch (error) {
+      throw new HttpException(
+        'Failed to update event image',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 }

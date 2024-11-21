@@ -97,6 +97,22 @@ export class EventController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/image')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('image'))
+  async updateEventImage(
+    @Param('id') eventId: number,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    try {
+      const imageUrl = await this.cloudinaryService.uploadImage(file);
+      return await this.eventService.updateEventImage(eventId, imageUrl);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
