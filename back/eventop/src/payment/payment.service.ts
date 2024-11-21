@@ -27,6 +27,7 @@ export class PaymentService {
 
   async createPreference(data: PaymentDto) {
     const { eventId, email } = data;
+
     const event = await this.eventService.getEventById(eventId);
     const user = await this.userService.findOneByEmail(email);
 
