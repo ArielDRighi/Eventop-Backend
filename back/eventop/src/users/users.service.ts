@@ -20,11 +20,16 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async findOneByEmail(email: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { email } });
-  }
   async findOneUser(userId: number): Promise<User> {
     return await this.userRepository.findOne({ where: { userId } });
+  }
+
+  async findOneByEmail(email: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    return user;
   }
 
   async createUser(user: CreateUserDto): Promise<Partial<User>> {

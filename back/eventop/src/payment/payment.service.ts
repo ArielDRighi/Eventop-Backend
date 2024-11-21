@@ -1,18 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+// payment.service.ts
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import MercadoPagoConfig, { Preference } from 'mercadopago';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from '../events/entities/events.entity';
 import { EventService } from '../events/events.service';
-import { Controller, Post, Body } from '@nestjs/common'; // Importa los decoradores necesarios
 import { sendPurchaseEmail } from '@app/config/nodeMailer';
 import { UserService } from '@app/users/users.service';
 import { PaymentDto } from './dto/Payment.dto';
+import { config as dotenvConfig } from 'dotenv';
 
-// Agrega credenciales
+dotenvConfig({ path: '.env' });
+
 const client = new MercadoPagoConfig({
-  accessToken:
-    'APP_USR-7919481759638533-111217-7dc46b6e24d13dd0582f26d3cba133d4-38184233',
+  accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN,
 });
 
 @Injectable()
@@ -29,16 +30,20 @@ export class PaymentService {
     const event = await this.eventService.getEventById(eventId);
     const user = await this.userService.findOneByEmail(email);
 
-    const name = user.name;
-
     if (!event) {
-      throw new NotFoundException(`Event with ID ${eventId} not found`);
+      throw new NotFoundException('Event not found');
     }
 
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    const name = user.name;
     const unitPrice = Number(event.price);
     if (isNaN(unitPrice)) {
       throw new Error('Event price is not a valid number');
     }
+
     const preference = new Preference(client);
 
     try {
@@ -49,12 +54,12 @@ export class PaymentService {
               title: event.name,
               description: event.description,
               quantity: 1,
-              unit_price: Number(event.price),
+              unit_price: unitPrice,
               id: event.eventId.toString(),
             },
           ],
           payer: {
-            email: 'payer_email@example.com', // Puedes obtener el email del comprador si está disponible
+            email: user.email,
           },
           back_urls: {
             success: 'https://www.tu-sitio.com/success',
@@ -68,21 +73,7 @@ export class PaymentService {
       return response.id;
     } catch (error) {
       console.log('Error', error);
-
       throw error;
     }
-  }
-}
-
-// Define un controlador para manejar la ruta
-@Controller('payment')
-export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
-
-  @Post('create_preference')
-  async createPreference(@Body() data: PaymentDto) {
-    return {
-      preferenceId: await this.paymentService.createPreference(data),
-    };
   }
 }
