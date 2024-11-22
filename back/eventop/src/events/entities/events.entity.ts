@@ -34,6 +34,9 @@ export class Event {
   @Column({ type: 'int', name: 'quantity_available', default: 1000 })
   quantityAvailable: number;
 
+  @Column({ type: 'boolean', default: false })
+  approved: boolean;
+
   @ManyToOne(() => Location, (location) => location.events_id)
   @JoinColumn({ name: 'location_id' })
   location_id: Location;
