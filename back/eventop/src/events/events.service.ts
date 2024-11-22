@@ -133,4 +133,16 @@ export class EventService {
       throw new HttpException('Failed to delete event', HttpStatus.BAD_REQUEST);
     }
   }
+
+  async discountQuantity(eventId: number, quantity: number) {
+    const event = await this.getEventById(eventId);
+    if (event.quantityAvailable < quantity) {
+      throw new HttpException(
+        `Not enough tickets available for ${event.name}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    event.quantityAvailable -= quantity;
+    return await this.eventRepository.save(event);
+  }
 }

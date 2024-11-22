@@ -19,4 +19,13 @@ export class PaymentDto {
   @IsString()
   @IsNotEmpty()
   email: string;
+
+  @ApiProperty({
+    type: String,
+    description: 'The quantity of the tickets',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  quantity: string;
 }

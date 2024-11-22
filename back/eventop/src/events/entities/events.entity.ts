@@ -31,6 +31,9 @@ export class Event {
   @Column({ type: 'text', nullable: true })
   imageUrl: string;
 
+  @Column({ type: 'int', name: 'quantity_available', default: 1000 })
+  quantityAvailable: number;
+
   @ManyToOne(() => Location, (location) => location.events_id)
   @JoinColumn({ name: 'location_id' })
   location_id: Location;

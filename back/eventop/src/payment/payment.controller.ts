@@ -7,7 +7,7 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('create_preference')
-  async createPreference(@Body() data: PaymentDto) {
+  async createPreference(@Body() data: any) {
     return {
       preferenceId: await this.paymentService.createPreference(data),
     };
