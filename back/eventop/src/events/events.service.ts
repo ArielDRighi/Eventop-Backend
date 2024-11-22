@@ -145,4 +145,17 @@ export class EventService {
     event.quantityAvailable -= quantity;
     return await this.eventRepository.save(event);
   }
+
+  async approveEvent(eventId: number) {
+    const event = this.getEventById(eventId);
+    if (!event) {
+      throw new HttpException(
+        `Event with ID ${eventId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.eventRepository.update({ eventId }, { approved: true });
+    const approvedEvent = await this.getEventById(eventId);
+    return { message: 'Event approved successfully', approvedEvent };
+  }
 }
