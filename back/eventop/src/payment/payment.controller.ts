@@ -13,7 +13,3 @@ export class PaymentController {
     };
   }
 }
-
-function dotenvConfig() {
-  throw new Error('Function not implemented.');
-}
