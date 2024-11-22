@@ -31,7 +31,7 @@ export class Event {
   @Column({ type: 'text', nullable: true })
   imageUrl: string;
 
-  @Column({ type: 'int', name: 'quantity_available' })
+  @Column({ type: 'int', name: 'quantity_available', default: 0 })
   quantityAvailable: number;
 
   @Column({ type: 'boolean', default: false })
