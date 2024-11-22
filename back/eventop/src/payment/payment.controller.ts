@@ -7,13 +7,9 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('create_preference')
-  async createPreference(@Body() data: any) {
+  async createPreference(@Body() data: PaymentDto) {
     return {
       preferenceId: await this.paymentService.createPreference(data),
     };
   }
-}
-
-function dotenvConfig() {
-  throw new Error('Function not implemented.');
 }

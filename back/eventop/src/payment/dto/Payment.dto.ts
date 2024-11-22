@@ -21,11 +21,11 @@ export class PaymentDto {
   email: string;
 
   @ApiProperty({
-    type: String,
+    type: Number,
     description: 'The quantity of the tickets',
     required: true,
   })
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  quantity: string;
+  quantity: number;
 }
