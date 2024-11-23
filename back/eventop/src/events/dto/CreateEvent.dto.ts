@@ -73,4 +73,13 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   imageUrl: string;
+
+  @ApiProperty({
+    type: Number,
+    description: 'The quantity of tickets available',
+    required: true,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  quantityAvailable: number;
 }

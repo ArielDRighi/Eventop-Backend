@@ -57,6 +57,7 @@ export class EventService {
       location_id,
       imageUrl,
       category_id,
+      quantityAvailable,
     } = createEventDto;
 
     const location = await this.locationRepository.findOne({
@@ -82,6 +83,7 @@ export class EventService {
       location_id,
       imageUrl,
       category_id,
+      quantityAvailable,
     });
 
     const savedEvent = await this.eventRepository.save(newEvent);
