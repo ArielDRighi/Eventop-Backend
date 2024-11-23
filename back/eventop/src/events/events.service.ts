@@ -152,6 +152,10 @@ export class EventService {
     userLongitude: number,
     radius: number,
   ) {
+    console.log('userLatitude', userLatitude);
+    console.log('userLongitude', userLongitude);
+    console.log('radius', radius);
+
     const events = await this.eventRepository.find({
       relations: ['location_id'],
     });

@@ -50,6 +50,9 @@ export class EventController {
     @Query('longitude') longitude: number,
     @Query('radius') radius: number,
   ) {
+    console.log('Latitude', latitude);
+    console.log('longitude', longitude);
+    console.log('radius', radius);
     try {
       return await this.eventService.getNearbyEvents(
         latitude,
