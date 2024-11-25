@@ -52,8 +52,9 @@ export class UserService {
     }
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await this.userRepository.find();
+  async getAllUsers(): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userRepository.find();
+    return users.map(({ password, ...user }) => user);
   }
 
   async updateUser(
