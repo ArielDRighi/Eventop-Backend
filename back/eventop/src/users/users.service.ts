@@ -5,6 +5,7 @@ import {
   NotFoundException,
   HttpStatus,
   HttpException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -53,35 +54,45 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<Omit<User, 'password'>[]> {
-    const users = await this.userRepository.find();
-    return users.map(({ password, ...user }) => user);
+    try {
+      const users = await this.userRepository.find();
+      return users.map(({ password, ...user }) => user);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener los usuarios',
+        error,
+      );
+    }
   }
 
   async updateUser(
     userId: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { userId } });
-    if (!user) {
-      throw new HttpException(
-        `Usuario con ID ${userId} inexistente`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    if (Object.keys(updateUserDto).length === 0) {
-      throw new HttpException(
-        'No se proporcionaron datos para actualizar',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    Object.assign(user, updateUserDto);
+  ): Promise<Omit<User, 'password'>> {
     try {
-      return await this.userRepository.save(user);
+      const user = await this.userRepository.findOne({ where: { userId } });
+      if (!user) {
+        throw new HttpException(
+          `Usuario con ID ${userId} inexistente`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      if (Object.keys(updateUserDto).length === 0) {
+        throw new HttpException(
+          'No se proporcionaron datos para actualizar',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      await this.userRepository.update(userId, updateUserDto);
+      const updatedUser = await this.userRepository.findOne({
+        where: { userId },
+      });
+      const { password, ...result } = updatedUser;
+      return result;
     } catch (error) {
-      console.log('error al guardar el usuario', error);
-      throw new HttpException(
-        'Fallo al actualizar el usuario',
-        HttpStatus.BAD_REQUEST,
+      throw new InternalServerErrorException(
+        'Error al actualizar el usuario',
+        error,
       );
     }
   }
