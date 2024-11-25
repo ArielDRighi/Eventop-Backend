@@ -14,6 +14,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -59,9 +60,12 @@ export class UserController {
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Get()
-  async getAllUsers() {
+  async getAllUsers(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ) {
     try {
-      return await this.userService.getAllUsers();
+      return await this.userService.getAllUsers(page, limit);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
