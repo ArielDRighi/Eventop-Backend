@@ -57,4 +57,13 @@ export class UpdateEventDto {
   @IsNumber()
   @IsOptional()
   locationId?: number;
+
+  @ApiProperty({
+    type: Number,
+    description: 'The total tickets of the event',
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  quantityTotal?: number;
 }
