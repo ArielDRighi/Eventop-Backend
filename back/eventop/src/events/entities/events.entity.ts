@@ -31,8 +31,17 @@ export class Event {
   @Column({ type: 'text', nullable: true })
   imageUrl: string;
 
-  @Column({ type: 'int', name: 'quantity_available', default: 1000 })
+  @Column({ type: 'int', name: 'quantity_total', default: 100 })
+  quantityTotal: number;
+
+  @Column({ type: 'int', name: 'quantity_available', default: 100 })
   quantityAvailable: number;
+
+  @Column({ type: 'int', name: 'quantity_sold', default: 0 })
+  quantitySold: number;
+
+  @Column({ type: 'boolean', default: false })
+  approved: boolean;
 
   @ManyToOne(() => Location, (location) => location.events_id)
   @JoinColumn({ name: 'location_id' })

@@ -129,4 +129,16 @@ export class EventController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  async approveEvent(@Param('id') eventId: number) {
+    try {
+      return await this.eventService.approveEvent(eventId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }

@@ -58,6 +58,7 @@ export class EventService {
       location_id,
       imageUrl,
       category_id,
+      quantityTotal,
     } = createEventDto;
 
     const location = await this.locationRepository.findOne({
@@ -83,6 +84,7 @@ export class EventService {
       location_id,
       imageUrl,
       category_id,
+      quantityTotal,
     });
 
     const savedEvent = await this.eventRepository.save(newEvent);
@@ -144,6 +146,7 @@ export class EventService {
       );
     }
     event.quantityAvailable -= quantity;
+    event.quantitySold += quantity;
     return await this.eventRepository.save(event);
   }
 
@@ -169,5 +172,18 @@ export class EventService {
       );
       return distance <= radius;
     });
+  }
+
+  async approveEvent(eventId: number) {
+    const event = this.getEventById(eventId);
+    if (!event) {
+      throw new HttpException(
+        `Event with ID ${eventId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.eventRepository.update({ eventId }, { approved: true });
+    const approvedEvent = await this.getEventById(eventId);
+    return { message: 'Event approved successfully', approvedEvent };
   }
 }
