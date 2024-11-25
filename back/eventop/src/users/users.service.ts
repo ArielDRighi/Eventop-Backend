@@ -53,9 +53,15 @@ export class UserService {
     }
   }
 
-  async getAllUsers(): Promise<Omit<User, 'password'>[]> {
+  async getAllUsers(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<Omit<User, 'password'>[]> {
     try {
-      const users = await this.userRepository.find();
+      const [users, total] = await this.userRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+      });
       return users.map(({ password, ...user }) => user);
     } catch (error) {
       throw new InternalServerErrorException(
