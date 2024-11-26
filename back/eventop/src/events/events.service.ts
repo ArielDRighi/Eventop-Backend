@@ -186,4 +186,16 @@ export class EventService {
     const approvedEvent = await this.getEventById(eventId);
     return { message: 'Event approved successfully', approvedEvent };
   }
+
+  async updateImage(eventId: number, imageUrl: string) {
+    const event = await this.getEventById(eventId);
+    if (!event) {
+      throw new HttpException(
+        `Event with ID ${eventId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    event.imageUrl = imageUrl;
+    return await this.eventRepository.save(event);
+  }
 }
