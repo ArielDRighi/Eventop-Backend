@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Event } from '@app/events/entities/events.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -37,4 +39,6 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
+  @OneToMany(() => Event, (event) => event.user)
+  events: Event[];
 }

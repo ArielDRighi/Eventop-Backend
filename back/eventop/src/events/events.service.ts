@@ -12,6 +12,8 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { Category } from '@app/categories/entities/categories.entity';
 import { Location } from '@app/locations/entities/locations.entity';
 import { getDistance } from 'geolib';
+import { Role } from '@app/auth/enum/roles.enum';
+import { User } from '@app/users/entities/users.entity';
 
 @Injectable()
 export class EventService {
@@ -49,6 +51,9 @@ export class EventService {
   }
 
   async createEvent(createEventDto): Promise<Event> {
+    if ( createEventDto.user.role !== Role.Client) {
+      throw new Error('Solo los usuarios con rol de "client" pueden crear eventos.');
+    }
     let {
       name,
       description,
@@ -85,12 +90,14 @@ export class EventService {
       imageUrl,
       category_id,
       quantityAvailable,
+      user: createEventDto.user,
+      approved: false,
     });
 
     const savedEvent = await this.eventRepository.save(newEvent);
     const eventWithRelations = await this.eventRepository.findOne({
       where: { eventId: newEvent.eventId },
-      relations: ['location_id', 'category_id'],
+      relations: ['location_id', 'category_id', 'user'],
     });
     return eventWithRelations;
   }
@@ -98,40 +105,100 @@ export class EventService {
   async updateEvent(
     eventId: number,
     updateEventDto: UpdateEventDto,
+    user: User,  // Usuario autenticado
   ): Promise<Event> {
-    const event = await this.eventRepository.findOne({ where: { eventId } });
-
+    // Buscar el evento por su ID
+    const event = await this.eventRepository.findOne({ 
+      where: { eventId }, 
+      relations: ['user']  // Relación con el usuario creador
+    });
+  
+    // Si el evento no existe, lanzamos una excepción
     if (!event) {
       throw new HttpException(
         `Evento con ID ${eventId} no encontrado`,
         HttpStatus.NOT_FOUND,
       );
     }
+  
+    if (user.role === Role.Admin) {
+      
+      Object.assign(event, updateEventDto);
+      try {
+        return await this.eventRepository.save(event);
+      } catch (error) {
+        throw new HttpException('Failed to update event', HttpStatus.BAD_REQUEST);
+      }
+    }
+  
+    if (event.user.userId !== user.userId) {
+      throw new HttpException('No tienes permisos para actualizar este evento', HttpStatus.FORBIDDEN);
+    }
+  
+    // Si el evento ya está aprobado, no se puede modificar
+    if (event.approved) {
+      throw new HttpException('No puedes modificar un evento aprobado', HttpStatus.FORBIDDEN);
+    }
+  
+    // Si es un Client y el evento está pendiente de aprobación, puede modificarlo
     if (typeof updateEventDto.date === 'string') {
       updateEventDto.date = new Date(updateEventDto.date);
     }
+  
     Object.assign(event, updateEventDto);
-
+  
     try {
       return await this.eventRepository.save(event);
     } catch (error) {
       throw new HttpException('Failed to update event', HttpStatus.BAD_REQUEST);
     }
   }
+  
 
-  async deleteEvent(eventId: number): Promise<{ message: string }> {
-    const event = await this.getEventById(eventId);
-    console.log(event);
+  async approveEvent(eventId: number, user: User): Promise<Event> {
+    if (user.role !== Role.Admin) {
+      throw new HttpException('Solo los admins pueden aprobar eventos', HttpStatus.FORBIDDEN);
+    }
+  
+    const event = await this.eventRepository.findOne({ where: { eventId } });
+  
+    if (!event) {
+      throw new HttpException('Evento no encontrado', HttpStatus.NOT_FOUND);
+    }
+  
+    event.approved = true;
+  
+    try {
+      return await this.eventRepository.save(event);
+    } catch (error) {
+      throw new HttpException('Failed to approve event', HttpStatus.BAD_REQUEST);
+    }
+  }
+  
+  
 
+  async deleteEvent(
+    eventId: number,
+    user: User,  // Asegúrate de pasar el usuario autenticado
+  ): Promise<{ message: string }> {
+    const event = await this.eventRepository.findOne({ where: { eventId }, relations: ['user'] });
+  
     if (!event) {
       throw new HttpException(
-        `Event with ID ${eventId} not found`,
+        `Evento con ID ${eventId} no encontrado`,
         HttpStatus.NOT_FOUND,
       );
     }
+  
+    // Verificar si el usuario autenticado es el creador del evento
+    if (event.user.userId !== user.userId) {
+      throw new HttpException('No tienes permisos para eliminar este evento', HttpStatus.FORBIDDEN);
+    }
+  
     try {
+      // Eliminar el evento
       await this.eventRepository.remove(event);
-      return { message: 'Event deleted successfully' };
+      return { message: 'Evento eliminado exitosamente' };
     } catch (error) {
       throw new HttpException('Failed to delete event', HttpStatus.BAD_REQUEST);
     }
@@ -172,19 +239,6 @@ export class EventService {
       );
       return distance <= radius;
     });
-  }
-
-  async approveEvent(eventId: number) {
-    const event = this.getEventById(eventId);
-    if (!event) {
-      throw new HttpException(
-        `Event with ID ${eventId} not found`,
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    await this.eventRepository.update({ eventId }, { approved: true });
-    const approvedEvent = await this.getEventById(eventId);
-    return { message: 'Event approved successfully', approvedEvent };
   }
 
   async updateImage(eventId: number, imageUrl: string) {

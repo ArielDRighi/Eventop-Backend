@@ -1,3 +1,4 @@
+import { User } from '@app/users/entities/users.entity';
 import { Category } from 'src/categories/entities/categories.entity';
 import { Location } from 'src/locations/entities/locations.entity';
 import {
@@ -52,4 +53,7 @@ export class Event {
   })
   @JoinColumn({ name: 'category_id' })
   category_id: Category;
+  @ManyToOne(() => User, (user) => user.events, {onDelete: 'CASCADE', nullable: false }) 
+  @JoinColumn({ name: 'user_id' })  
+  user: User;  
 }
