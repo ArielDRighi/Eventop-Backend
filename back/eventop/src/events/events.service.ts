@@ -11,6 +11,7 @@ import { CreateEventDto } from './dto/CreateEvent.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Category } from '@app/categories/entities/categories.entity';
 import { Location } from '@app/locations/entities/locations.entity';
+import { getDistance } from 'geolib';
 
 @Injectable()
 export class EventService {
@@ -145,7 +146,32 @@ export class EventService {
       );
     }
     event.quantityAvailable -= quantity;
+    event.quantitySold += quantity;
     return await this.eventRepository.save(event);
+  }
+
+  async getNearbyEvents(
+    userLatitude: number,
+    userLongitude: number,
+    radius: number,
+  ) {
+    console.log('userLatitude', userLatitude);
+    console.log('userLongitude', userLongitude);
+    console.log('radius', radius);
+
+    const events = await this.eventRepository.find({
+      relations: ['location_id'],
+    });
+    return events.filter((event) => {
+      const distance = getDistance(
+        { latitude: userLatitude, longitude: userLongitude },
+        {
+          latitude: event.location_id.latitude,
+          longitude: event.location_id.longitude,
+        },
+      );
+      return distance <= radius;
+    });
   }
 
   async approveEvent(eventId: number) {
