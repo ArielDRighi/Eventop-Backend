@@ -60,10 +60,10 @@ export class UpdateEventDto {
 
   @ApiProperty({
     type: Number,
-    description: 'The total tickets of the event',
+    description: 'The quantity of tickets available',
     required: false,
   })
   @IsNumber()
   @IsOptional()
-  quantityTotal?: number;
+  quantityAvailable?: number;
 }

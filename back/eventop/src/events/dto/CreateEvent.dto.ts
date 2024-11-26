@@ -76,10 +76,10 @@ export class CreateEventDto {
 
   @ApiProperty({
     type: Number,
-    description: 'The capacity of the event',
+    description: 'The quantity of tickets available',
     required: true,
   })
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  quantityTotal: number;
+  quantityAvailable: number;
 }
