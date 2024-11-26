@@ -15,4 +15,15 @@ export class MailService {
       text,
     });
   }
+
+  async sendUnbanNotification(email: string) {
+    const subject = 'Desbaneo';
+    const text = `Tu cuenta ha sido desbaneada. Ahora puedes acceder a todos los servicios de la plataforma.`;
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject,
+      text,
+    });
+  }
 }

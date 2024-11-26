@@ -111,17 +111,65 @@ export class UserService {
       throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
     }
 
-    user.isBanned = true;
-    user.banReason = reason;
-    user.banUntil = permanent
-      ? null
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
+    if (permanent) {
+      try {
+        await this.userRepository.remove(user);
+        await this.mailService.sendBanNotification(
+          user.email,
+          reason,
+          permanent,
+        );
+        return {
+          message: 'Usuario baneado permanentemente y eliminado exitosamente',
+        };
+      } catch (error) {
+        throw new HttpException(
+          'Error al eliminar el usuario',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } else {
+      user.isBanned = true;
+      user.banReason = reason;
+      user.banUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
+
+      await this.userRepository.save(user);
+      await this.mailService.sendBanNotification(user.email, reason, permanent);
+
+      return { message: 'Usuario baneado temporalmente exitosamente' };
+    }
+  }
+
+  async unbanUser(userId: number) {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    user.isBanned = false;
+    user.banReason = null;
+    user.banUntil = null;
 
     await this.userRepository.save(user);
+    await this.mailService.sendUnbanNotification(user.email);
 
-    // Enviar correo de notificación
-    await this.mailService.sendBanNotification(user.email, reason, permanent);
+    return { message: 'Usuario desbaneado exitosamente' };
+  }
 
-    return { message: 'Usuario baneado exitosamente' };
+  async deleteUser(userId: number): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    try {
+      await this.userRepository.remove(user);
+      return { message: 'Usuario eliminado exitosamente' };
+    } catch (error) {
+      throw new HttpException(
+        'Error al eliminar el usuario',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 }

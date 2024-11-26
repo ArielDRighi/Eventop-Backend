@@ -15,6 +15,7 @@ import {
   UploadedFile,
   BadRequestException,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -143,5 +144,26 @@ export class UserController {
       banUserDto.reason,
       banUserDto.permanent,
     );
+  }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/unban')
+  @ApiOperation({ summary: 'Unban a user' })
+  @ApiResponse({ status: 200, description: 'User unbanned successfully.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  async unbanUser(@Param('id') userId: number) {
+    return await this.userService.unbanUser(userId);
+  }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a user' })
+  @ApiResponse({ status: 200, description: 'User deleted successfully.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  async deleteUser(@Param('id') userId: number) {
+    return await this.userService.deleteUser(userId);
   }
 }
