@@ -11,6 +11,7 @@ import { CreateEventDto } from './dto/CreateEvent.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Category } from '@app/categories/entities/categories.entity';
 import { Location } from '@app/locations/entities/locations.entity';
+import { getDistance } from 'geolib';
 
 @Injectable()
 export class EventService {
@@ -57,6 +58,7 @@ export class EventService {
       location_id,
       imageUrl,
       category_id,
+      quantityAvailable,
     } = createEventDto;
 
     const location = await this.locationRepository.findOne({
@@ -82,6 +84,7 @@ export class EventService {
       location_id,
       imageUrl,
       category_id,
+      quantityAvailable,
     });
 
     const savedEvent = await this.eventRepository.save(newEvent);
@@ -132,5 +135,55 @@ export class EventService {
     } catch (error) {
       throw new HttpException('Failed to delete event', HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async discountQuantity(eventId: number, quantity: number) {
+    const event = await this.getEventById(eventId);
+    if (event.quantityAvailable < quantity) {
+      throw new HttpException(
+        `Not enough tickets available for ${event.name}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    event.quantityAvailable -= quantity;
+    event.quantitySold += quantity;
+    return await this.eventRepository.save(event);
+  }
+
+  async getNearbyEvents(
+    userLatitude: number,
+    userLongitude: number,
+    radius: number,
+  ) {
+    console.log('userLatitude', userLatitude);
+    console.log('userLongitude', userLongitude);
+    console.log('radius', radius);
+
+    const events = await this.eventRepository.find({
+      relations: ['location_id'],
+    });
+    return events.filter((event) => {
+      const distance = getDistance(
+        { latitude: userLatitude, longitude: userLongitude },
+        {
+          latitude: event.location_id.latitude,
+          longitude: event.location_id.longitude,
+        },
+      );
+      return distance <= radius;
+    });
+  }
+
+  async approveEvent(eventId: number) {
+    const event = this.getEventById(eventId);
+    if (!event) {
+      throw new HttpException(
+        `Event with ID ${eventId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.eventRepository.update({ eventId }, { approved: true });
+    const approvedEvent = await this.getEventById(eventId);
+    return { message: 'Event approved successfully', approvedEvent };
   }
 }

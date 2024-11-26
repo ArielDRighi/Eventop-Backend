@@ -12,6 +12,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Query,
 } from '@nestjs/common';
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/CreateEvent.dto';
@@ -42,7 +43,26 @@ export class EventController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
+  @Get('nearby')
+  @HttpCode(HttpStatus.OK)
+  async getNearbyEvents(
+    @Query('latitude') latitude: number,
+    @Query('longitude') longitude: number,
+    @Query('radius') radius: number,
+  ) {
+    console.log('Latitude', latitude);
+    console.log('longitude', longitude);
+    console.log('radius', radius);
+    try {
+      return await this.eventService.getNearbyEvents(
+        latitude,
+        longitude,
+        radius,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getEventById(@Param('id') eventId: number) {
@@ -105,6 +125,18 @@ export class EventController {
   async deleteEvent(@Param('id') eventId: number) {
     try {
       return await this.eventService.deleteEvent(eventId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  async approveEvent(@Param('id') eventId: number) {
+    try {
+      return await this.eventService.approveEvent(eventId);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

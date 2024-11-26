@@ -1,5 +1,10 @@
 // payment.service.ts
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  BadRequestException,
+} from '@nestjs/common';
 import MercadoPagoConfig, { Preference } from 'mercadopago';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -26,11 +31,20 @@ export class PaymentService {
   ) {}
 
   async createPreference(data: PaymentDto) {
-    const { eventId, email } = data;
+    const { eventId, email, quantity } = data;
 
     const event = await this.eventService.getEventById(eventId);
+    const discountQuantity = await this.eventService.discountQuantity(
+      eventId,
+      Number(quantity),
+    );
     const user = await this.userService.findOneByEmail(email);
 
+    console.log('Quantity:', quantity, typeof quantity);
+
+    if (!discountQuantity) {
+      throw new BadRequestException('Not enough tickets available');
+    }
     if (!event) {
       throw new NotFoundException('Event not found');
     }
@@ -54,7 +68,7 @@ export class PaymentService {
             {
               title: event.name,
               description: event.description,
-              quantity: 1,
+              quantity: Number(quantity),
               unit_price: unitPrice,
               id: event.eventId.toString(),
             },

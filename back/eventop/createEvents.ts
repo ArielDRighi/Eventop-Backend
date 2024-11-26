@@ -13,6 +13,8 @@ const events = [
     categoryId: 1,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626417/bdktl6jwabmfbaqax8rr.jpg',
+    approved: true,
+    quantityAvailable: 100,
   },
   {
     name: 'Art Exhibition',
@@ -23,6 +25,8 @@ const events = [
     locationId: 2,
     categoryId: 2,
     imageUrl: '',
+    approved: true,
+    quantityAvailable: 100,
   },
   {
     name: 'Food Festival',
@@ -33,6 +37,8 @@ const events = [
     locationId: 3,
     categoryId: 3,
     imageUrl: '',
+    approved: true,
+    quantityAvailable: 100,
   },
   {
     name: 'Tech Conference',
@@ -44,6 +50,8 @@ const events = [
     categoryId: 4,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626324/zs4ysqygsat3qazvqiq2.avif',
+    approved: true,
+    quantityAvailable: 200,
   },
   {
     name: 'Comedy Show',
@@ -55,6 +63,8 @@ const events = [
     categoryId: 5,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626291/upn7irlampilruqhedz3.jpg',
+    approved: true,
+    quantityAvailable: 500,
   },
   {
     name: 'Dance Performance',
@@ -66,6 +76,8 @@ const events = [
     categoryId: 2,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626259/x4t0ppcexicmjtmd4gaz.jpg',
+    approved: true,
+    quantityAvailable: 1000,
   },
   {
     name: 'Evento gratuito',
@@ -77,6 +89,8 @@ const events = [
     categoryId: 3,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626095/p6mmfcj8zegqd4mbplay.jpg',
+    approved: true,
+    quantityAvailable: 150,
   },
   {
     name: 'Film Screening',
@@ -88,6 +102,8 @@ const events = [
     categoryId: 2,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626218/muoupqrua1oasw4wjtj0.jpg',
+    approved: true,
+    quantityAvailable: 1500,
   },
   {
     name: 'Science Fair',
@@ -99,6 +115,8 @@ const events = [
     categoryId: 2,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626179/hex5lmnuhihmrmhoihwm.jpg',
+    approved: true,
+    quantityAvailable: 100,
   },
   {
     name: 'Literary Festival',
@@ -110,6 +128,8 @@ const events = [
     categoryId: 1,
     imageUrl:
       'https://res.cloudinary.com/dcaqkyvfu/image/upload/v1731626132/msuvagzau77xiacs4w6u.jpg',
+    approved: true,
+    quantityAvailable: 3,
   },
 ];
 

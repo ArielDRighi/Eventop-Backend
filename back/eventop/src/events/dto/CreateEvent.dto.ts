@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsString, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -73,4 +73,13 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   imageUrl: string;
+
+  @ApiProperty({
+    type: Number,
+    description: 'The quantity of tickets available',
+    required: true,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  quantityAvailable: number;
 }
