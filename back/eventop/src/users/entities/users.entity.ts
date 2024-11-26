@@ -37,4 +37,13 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
+
+  @Column({ default: false })
+  isBanned: boolean;
+
+  @Column({ nullable: true })
+  banReason: string;
+
+  @Column({ nullable: true })
+  banUntil: Date;
 }

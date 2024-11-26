@@ -18,6 +18,9 @@ export class AuthService {
     if (!dbUser) {
       throw new BadRequestException('Usuario no encontrado');
     }
+    if (dbUser.isBanned) {
+      throw new BadRequestException(`Usuario baneado: ${dbUser.banReason}`);
+    }
     const isPasswordValid = await bcrypt.compare(
       credential.password,
       dbUser.password,
@@ -36,7 +39,10 @@ export class AuthService {
   }
 
   async signUp(user: CreateUserDto) {
-    console.log('Iniciando el proceso de registro para el usuario:', user.email);
+    console.log(
+      'Iniciando el proceso de registro para el usuario:',
+      user.email,
+    );
 
     // Revisamos que las contraseñas coincidan
     if (user.password !== user.confirmPassword) {
@@ -59,7 +65,7 @@ export class AuthService {
     // Creamos el nuevo usuario en la base de datos
     const createdUser = await this.userService.createUser(newUser);
     console.log('Usuario creado exitosamente:', createdUser.email);
-   
+
     // Enviar el correo de bienvenida al usuario después de la creación
     try {
       console.log('Intentando enviar el correo de bienvenida a:', user.email);
@@ -67,7 +73,9 @@ export class AuthService {
       console.log('Correo de bienvenida enviado correctamente a:', user.email);
     } catch (error) {
       console.error('Error al enviar el correo de bienvenida:', error);
-      throw new BadRequestException('Hubo un problema al enviar el correo de bienvenida');
+      throw new BadRequestException(
+        'Hubo un problema al enviar el correo de bienvenida',
+      );
     }
 
     // Devolvemos el usuario creado (sin la contraseña)

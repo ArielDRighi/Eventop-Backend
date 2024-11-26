@@ -14,11 +14,13 @@ import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { use } from 'passport';
 import { log } from 'console';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly mailService: MailService,
   ) {}
 
   async findOneUser(userId: number): Promise<User> {
@@ -101,5 +103,25 @@ export class UserService {
         error,
       );
     }
+  }
+
+  async banUser(userId: number, reason: string, permanent: boolean) {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    user.isBanned = true;
+    user.banReason = reason;
+    user.banUntil = permanent
+      ? null
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
+
+    await this.userRepository.save(user);
+
+    // Enviar correo de notificación
+    await this.mailService.sendBanNotification(user.email, reason, permanent);
+
+    return { message: 'Usuario baneado exitosamente' };
   }
 }

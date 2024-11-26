@@ -22,10 +22,16 @@ import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/auth/enum/roles.enum';
 import { RoleGuard } from 'src/auth/roles.guard';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '@app/events/cloudinary.service';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -123,5 +129,19 @@ export class UserController {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/ban')
+  @ApiOperation({ summary: 'Ban a user' })
+  @ApiResponse({ status: 200, description: 'User banned successfully.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  async banUser(@Param('id') userId: number, @Body() banUserDto: BanUserDto) {
+    return await this.userService.banUser(
+      userId,
+      banUserDto.reason,
+      banUserDto.permanent,
+    );
   }
 }
