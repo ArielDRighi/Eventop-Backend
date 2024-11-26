@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Comment } from './comments.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'users' })
 export class User {
@@ -37,4 +40,8 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  @Exclude()
+  comments: Comment[];
 }

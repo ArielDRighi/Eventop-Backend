@@ -116,10 +116,34 @@ export class UserController {
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Get('comments')
+  async getAllComments() {
+    try {
+      return await this.userService.getAllComments();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Get(':id')
   async getUserById(@Param('id', ParseIntPipe) userId: number) {
     try {
       return await this.userService.findOneUser(userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Post(':id/comment')
+  async addComment(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body('comment') commentText: string,
+  ) {
+    try {
+      return await this.userService.addComment(userId, commentText);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
