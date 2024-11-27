@@ -8,6 +8,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { LocationsModule } from './locations/locations.module';
 import TypeOrmConfig from './config/typeorm';
 import { PaymentModule } from './payment/payment.module';
+import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-inventario.gateway';
 
 @Module({
   imports: [
@@ -28,6 +29,6 @@ import { PaymentModule } from './payment/payment.module';
     PaymentModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [MonitorInventarioGateway],
 })
 export class AppModule {}

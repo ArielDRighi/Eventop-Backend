@@ -52,4 +52,5 @@ export class Event {
   })
   @JoinColumn({ name: 'category_id' })
   category_id: Category;
+  availableTickets: number | PromiseLike<number>;
 }
