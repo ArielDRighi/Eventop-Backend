@@ -121,6 +121,7 @@ export class UserService {
 
       user.comments.push(comment);
       await this.userRepository.save(user);
+      return comment;
       return user;
     } catch (error) {
       throw new InternalServerErrorException('Error at adding comment', error);
