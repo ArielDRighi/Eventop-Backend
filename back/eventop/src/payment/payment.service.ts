@@ -85,6 +85,13 @@ export class PaymentService {
         },
       });
       await sendPurchaseEmail(email, name, event.name);
+      const clientMail = event.user.email;
+      const clientName= event.user.name;
+      if (clientMail) {
+      await sendPurchaseEmail(clientMail, clientName, event.name);}
+      else {
+        throw new Error('Mail no encontrado');
+      }
       return response.id;
     } catch (error) {
       console.log('Error', error);
