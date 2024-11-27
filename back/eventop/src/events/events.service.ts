@@ -50,11 +50,11 @@ export class EventService {
     return event;
   }
 
-  async createEvent(createEventDto): Promise<Event> {
+  async createEvent(createEventDto: CreateEventDto): Promise<Event> {
     if ( createEventDto.user.role !== Role.Client) {
       throw new Error('Solo los usuarios con rol de "client" pueden crear eventos.');
     }
-    let {
+    const {
       name,
       description,
       date,
@@ -86,12 +86,12 @@ export class EventService {
       date,
       price,
       currency,
-      location_id,
+      location_id: location, 
       imageUrl,
-      category_id,
+      category_id: category, 
       quantityAvailable,
       user: createEventDto.user,
-      approved: false,
+      approved: false, 
     });
 
     const savedEvent = await this.eventRepository.save(newEvent);

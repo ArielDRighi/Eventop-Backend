@@ -17,7 +17,7 @@ import {
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/CreateEvent.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { Roles } from '@app/decorators/roles.decorator';
 import { Role } from '@app/auth/enum/roles.enum';
 import { AuthGuard } from '@nestjs/passport';
@@ -78,6 +78,7 @@ export class EventController {
   @Roles(Role.Admin || Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Post('create')
+  @ApiBody({ type: CreateEventDto })
   @UseInterceptors(FileInterceptor('image'))
   async createEvent(
     @Body('data') data: any, // Lo recibimos como 'any' para manejar el texto JSON.

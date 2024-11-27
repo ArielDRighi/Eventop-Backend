@@ -1,5 +1,6 @@
+import { User } from '@app/users/entities/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsString, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsDate, IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -84,6 +85,8 @@ export class CreateEventDto {
   quantityAvailable: number;
   @IsNumber()
   @IsNotEmpty()
-  user_id: number; 
+  user_id: number;
+  @IsOptional()
+  user: User; 
 }
 
