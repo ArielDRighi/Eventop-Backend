@@ -51,8 +51,8 @@ export class EventService {
   }
 
   async createEvent(createEventDto: CreateEventDto): Promise<Event> {
-    if ( createEventDto.user.role !== Role.Client) {
-      throw new Error('Solo los usuarios con rol de "client" pueden crear eventos.');
+    if ( createEventDto.user.role !== Role.Client || Role.Admin) {
+      throw new Error('Solo los usuarios con rol de "client" o "admin" pueden crear eventos.');
     }
     const {
       name,
@@ -121,38 +121,21 @@ export class EventService {
       );
     }
   
-    if (user.role === Role.Admin) {
+    if (user.role === Role.Admin || user.role === Role.Client) {
       
       Object.assign(event, updateEventDto);
       try {
         return await this.eventRepository.save(event);
       } catch (error) {
-        throw new HttpException('Failed to update event', HttpStatus.BAD_REQUEST);
+        throw new HttpException('falla en la actualizacion', HttpStatus.BAD_REQUEST);
       }
     }
   
     if (event.user.userId !== user.userId) {
       throw new HttpException('No tienes permisos para actualizar este evento', HttpStatus.FORBIDDEN);
-    }
-  
-    // Si el evento ya está aprobado, no se puede modificar
-    if (event.approved) {
-      throw new HttpException('No puedes modificar un evento aprobado', HttpStatus.FORBIDDEN);
-    }
-  
-    // Si es un Client y el evento está pendiente de aprobación, puede modificarlo
-    if (typeof updateEventDto.date === 'string') {
-      updateEventDto.date = new Date(updateEventDto.date);
-    }
-  
-    Object.assign(event, updateEventDto);
-  
-    try {
-      return await this.eventRepository.save(event);
-    } catch (error) {
-      throw new HttpException('Failed to update event', HttpStatus.BAD_REQUEST);
-    }
-  }
+    }}
+    
+
   
 
   async approveEvent(eventId: number, user: User): Promise<Event> {
@@ -171,7 +154,7 @@ export class EventService {
     try {
       return await this.eventRepository.save(event);
     } catch (error) {
-      throw new HttpException('Failed to approve event', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Fallo en la aprobacion del evento', HttpStatus.BAD_REQUEST);
     }
   }
   
