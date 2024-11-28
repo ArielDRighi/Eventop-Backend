@@ -7,6 +7,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Event } from '@app/events/entities/events.entity';
+import { Comment } from './comments.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'users' })
 export class User {
@@ -41,4 +43,17 @@ export class User {
   createdAt: Date;
   @OneToMany(() => Event, (event) => event.user)
   events: Event[];
+
+  @OneToMany(() => Comment, (comment) => comment.user)
+  @Exclude()
+  comments: Comment[];
+
+  @Column({ default: false })
+  isBanned: boolean;
+
+  @Column({ nullable: true })
+  banReason: string;
+
+  @Column({ nullable: true })
+  banUntil: Date;
 }
