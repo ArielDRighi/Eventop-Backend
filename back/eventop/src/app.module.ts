@@ -10,6 +10,7 @@ import TypeOrmConfig from './config/typeorm';
 import { PaymentModule } from './payment/payment.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-inventario.gateway';
 
 @Module({
   imports: [
@@ -49,6 +50,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
     MailModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [MonitorInventarioGateway],
 })
 export class AppModule {}
