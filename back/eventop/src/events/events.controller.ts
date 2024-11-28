@@ -115,6 +115,7 @@ export class EventController {
     @Body() updateEventDto: UpdateEventDto,
     @Request() req,
   ){const user = req.user;
+    console.log(updateEventDto);
     
     try {
       return await this.eventService.updateEvent(eventId, updateEventDto, user );

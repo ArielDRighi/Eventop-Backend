@@ -72,6 +72,7 @@ export class UpdateEventDto {
   })
   @IsBoolean()
   @Transform(({ value }) => (value === undefined ? false : value), { toClassOnly: true })
+  @IsOptional()
   approved?: boolean;
 }
 

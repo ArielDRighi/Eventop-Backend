@@ -164,10 +164,16 @@ export class EventService {
       );
     }
   
+    
     if (user.role === Role.Admin || user.role === Role.Client) {
-      
-      Object.assign(event, updateEventDto);
-      try {
+      const updatedEvent = {
+        ...updateEventDto,
+        approved:false}
+      console.log("update", updatedEvent);
+      Object.assign(event, updatedEvent);
+      console.log("event", updatedEvent);
+      try {     
+        
         return await this.eventRepository.save(event);
       } catch (error) {
         throw new HttpException('falla en la actualizacion', HttpStatus.BAD_REQUEST);
