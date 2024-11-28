@@ -44,4 +44,13 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.user)
   @Exclude()
   comments: Comment[];
+
+  @Column({ default: false })
+  isBanned: boolean;
+
+  @Column({ nullable: true })
+  banReason: string;
+
+  @Column({ nullable: true })
+  banUntil: Date;
 }

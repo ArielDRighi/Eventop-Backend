@@ -13,6 +13,7 @@ import { User } from './entities/users.entity';
 import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { Comment } from './entities/comments.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    private readonly mailService: MailService,
   ) {}
 
   async findOneUser(userId: number): Promise<User> {
@@ -141,6 +143,74 @@ export class UserService {
       throw new InternalServerErrorException(
         'Error at getting comments',
         error,
+      );
+    }
+  }
+
+  async banUser(userId: number, reason: string, permanent: boolean) {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    if (permanent) {
+      try {
+        await this.userRepository.remove(user);
+        await this.mailService.sendBanNotification(
+          user.email,
+          reason,
+          permanent,
+        );
+        return {
+          message: 'Usuario baneado permanentemente y eliminado exitosamente',
+        };
+      } catch (error) {
+        throw new HttpException(
+          'Error al eliminar el usuario',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } else {
+      user.isBanned = true;
+      user.banReason = reason;
+      user.banUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
+
+      await this.userRepository.save(user);
+      await this.mailService.sendBanNotification(user.email, reason, permanent);
+
+      return { message: 'Usuario baneado temporalmente exitosamente' };
+    }
+  }
+
+  async unbanUser(userId: number) {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    user.isBanned = false;
+    user.banReason = null;
+    user.banUntil = null;
+
+    await this.userRepository.save(user);
+    await this.mailService.sendUnbanNotification(user.email);
+
+    return { message: 'Usuario desbaneado exitosamente' };
+  }
+
+  async deleteUser(userId: number): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    try {
+      await this.userRepository.remove(user);
+      return { message: 'Usuario eliminado exitosamente' };
+    } catch (error) {
+      throw new HttpException(
+        'Error al eliminar el usuario',
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
