@@ -64,6 +64,7 @@ export class PaymentService {
     const preference = new Preference(client);
 
     try {
+      // Crear la preferencia
       const response = await preference.create({
         body: {
           items: [
@@ -88,12 +89,25 @@ export class PaymentService {
       });
 
       // Obtener la cantidad actualizada de entradas disponibles
-      const updatedInventoryCount = await this.getUpdatedInventoryCount(eventId.toString());
+      const updatedInventoryCount = await this.getUpdatedInventoryCount(
+        eventId.toString(),
+      );
 
       // Transmitir la actualización de inventario
-      this.monitorInventarioGateway.broadcastInventoryUpdate(updatedInventoryCount);
+      this.monitorInventarioGateway.broadcastInventoryUpdate(
+        updatedInventoryCount,
+      );
 
       await sendPurchaseEmail(email, name, event.name);
+
+      // Verificar si la preferencia fue creada correctamente y si la transacción fue aprobada
+      if (response.auto_return === 'approved') {
+        // Solo enviar el correo si el pago fue aprobado
+        await sendPurchaseEmail(email, name, event.name);
+      } else {
+        console.log('El pago no fue aprobado, no se enviará el correo');
+      }
+
       return response.id;
     } catch (error) {
       console.log('Error', error);
