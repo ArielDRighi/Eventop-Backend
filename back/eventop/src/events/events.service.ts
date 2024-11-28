@@ -172,6 +172,7 @@ export class EventService {
         approved:false}
 
       Object.assign(event, updatedEvent);
+      console.log("nombre",event.user.name);
 
       try {     
         const adminsEmails = await this.getAdminEmails();
@@ -180,7 +181,7 @@ export class EventService {
       console.log('Correos de administradores a los que se enviará la notificación:', adminsEmails);
       await notifyAdminsAboutEvent(
         adminsEmails,
-        user.name, // Nombre del cliente que creó el evento
+        event.user.name, // Nombre del cliente que creó el evento
         event.name, // Nombre del evento creado
       );
       console.log(`Notificaciones enviadas a los administradores para el evento "${event.name}".`);
