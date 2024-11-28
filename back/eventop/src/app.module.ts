@@ -8,7 +8,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { LocationsModule } from './locations/locations.module';
 import TypeOrmConfig from './config/typeorm';
 import { PaymentModule } from './payment/payment.module';
-import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-inventario.gateway';
+import { MailModule } from './mail/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -18,8 +19,26 @@ import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (ConfigService: ConfigService) =>
-        ConfigService.get('typeorm'),
+      useFactory: (configService: ConfigService) =>
+        configService.get('typeorm'),
+    }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          auth: {
+            user: configService.get<string>('EMAIL_USER'),
+            pass: configService.get<string>('EMAIL_PASS'),
+          },
+        },
+        defaults: {
+          from: `"No Reply" <${configService.get<string>('EMAIL_USER')}>`,
+        },
+      }),
     }),
     AuthModule,
     UsersModule,
@@ -27,8 +46,9 @@ import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-
     CategoriesModule,
     LocationsModule,
     PaymentModule,
+    MailModule,
   ],
   controllers: [],
-  providers: [MonitorInventarioGateway],
+  providers: [],
 })
 export class AppModule {}
