@@ -1,6 +1,7 @@
 services:
   # Servicio para el contenedor de la API
   eventop:
+    container_name: eventop-eventop
     build: 
       context: .  # Contexto de la imagen
       dockerfile: Dockerfile  # Archivo de Dockerfile
@@ -9,6 +10,14 @@ services:
       - "3000:3000"  # Exponer el puerto 3000 del contenedor
     env_file:
       - .env
+    environment:
+      - DB_HOST=postgres  # Nombre del servicio de la base de datos (nombre de contenedor de PostgreSQL)
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=eventop
+    depends_on:
+      - postgres
     volumes:
       - .:/src
     networks:
@@ -22,8 +31,12 @@ services:
       - ./postgres-data:/var/lib/postgresql/data  # Monta los datos de la base de datos
     env_file:
       - .env  # Variables de entorno
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: eventop
     ports:
-      - "5433:5432"  # Exponer el puerto 5432 para la conexión a la DB
+      - "5432:5432"  # Exponer el puerto 5432 para la conexión a la DB
     
     networks:
       - eventop_network  # Aseguramos que los contenedores estén en la misma red
@@ -33,7 +46,7 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: tymoszukdamiandejesus@gmail.com
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
       # POSTGRES_HOST_AUTH_METHOD: trust  # Permitir conexiones sin contraseña (solo para desarrollo)
     ports:

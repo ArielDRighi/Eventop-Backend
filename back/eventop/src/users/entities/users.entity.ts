@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Event } from '@app/events/entities/events.entity';
 import { Comment } from './comments.entity';
 import { Exclude } from 'class-transformer';
 
@@ -40,6 +41,8 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
+  @OneToMany(() => Event, (event) => event.user)
+  events: Event[];
 
   @OneToMany(() => Comment, (comment) => comment.user)
   @Exclude()

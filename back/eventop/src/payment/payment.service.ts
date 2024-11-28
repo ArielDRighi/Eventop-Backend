@@ -32,36 +32,37 @@ export class PaymentService {
 
   async createPreference(data: PaymentDto) {
     const { eventId, email, quantity } = data;
-
+  
     const event = await this.eventService.getEventById(eventId);
     const discountQuantity = await this.eventService.discountQuantity(
       eventId,
       Number(quantity),
     );
     const user = await this.userService.findOneByEmail(email);
-
+  
     console.log('Quantity:', quantity, typeof quantity);
-
+  
     if (!discountQuantity) {
       throw new BadRequestException('Not enough tickets available');
     }
     if (!event) {
       throw new NotFoundException('Event not found');
     }
-
+  
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
     }
-
+  
     const name = user.name;
     const unitPrice = Number(event.price);
     if (isNaN(unitPrice)) {
       throw new Error('Event price is not a valid number');
     }
-
+  
     const preference = new Preference(client);
-
+  
     try {
+      // Crear la preferencia
       const response = await preference.create({
         body: {
           items: [
@@ -84,8 +85,17 @@ export class PaymentService {
           auto_return: 'approved',
         },
       });
-      await sendPurchaseEmail(email, name, event.name);
+  
+      // Verificar si la preferencia fue creada correctamente y si la transacción fue aprobada
+      if (response.auto_return === 'approved') {
+        // Solo enviar el correo si el pago fue aprobado
+        await sendPurchaseEmail(email, name, event.name);
+      } else {
+        console.log('El pago no fue aprobado, no se enviará el correo');
+      }
+  
       return response.id;
+  
     } catch (error) {
       console.log('Error', error);
       throw error;
