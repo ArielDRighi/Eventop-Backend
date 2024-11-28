@@ -1,13 +1,14 @@
+// users.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm'; // Importa TypeOrmModule
 import { UserService } from './users.service';
 import { UserController } from './users.controller';
-import { User } from './entities/users.entity';
+import { User } from './entities/users.entity'; // Asegúrate de que esté en la ruta correcta
 import { CloudinaryService } from '@app/events/cloudinary.service';
-import { MailModule } from '../mail/mail.module';
+import { Comment } from './entities/comments.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), MailModule],
+  imports: [TypeOrmModule.forFeature([User, Comment])], // Registra UserRepository con TypeOrmModule
   providers: [UserService, CloudinaryService],
   controllers: [UserController],
   exports: [UserService],

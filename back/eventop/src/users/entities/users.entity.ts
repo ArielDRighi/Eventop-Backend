@@ -4,7 +4,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Comment } from './comments.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity({ name: 'users' })
 export class User {
@@ -38,12 +41,7 @@ export class User {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @Column({ default: false })
-  isBanned: boolean;
-
-  @Column({ nullable: true })
-  banReason: string;
-
-  @Column({ nullable: true })
-  banUntil: Date;
+  @OneToMany(() => Comment, (comment) => comment.user)
+  @Exclude()
+  comments: Comment[];
 }
