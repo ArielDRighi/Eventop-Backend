@@ -85,10 +85,5 @@ export class CreateEventDto {
   @IsNumber()
   @IsNotEmpty()
   quantityAvailable: number;
-  @IsNumber()
-  @IsNotEmpty()
-  user_id: number;
-  @IsOptional()
-  user: User; 
 }
 

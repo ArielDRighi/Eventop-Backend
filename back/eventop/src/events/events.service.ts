@@ -61,13 +61,14 @@ export class EventService {
     return admins.map((admin) => admin.email);
   }
   
-  async createEvent(createEventDto: CreateEventDto): Promise<Event> {
+  async createEvent(createEventDto: CreateEventDto, userId: number): Promise<Event> {
     const user = await this.userRepository.findOne({
-      where: { userId: createEventDto.user_id },
+      where: { userId },
     });
+    console.log(user);
   
     if (!user) {
-      throw new Error(`Usuario con ID ${createEventDto.user_id} no encontrado`);
+      throw new Error(`Usuario con ID ${userId} no encontrado`);
     }
   
     if (user.role !== Role.Client && user.role !== Role.Admin) {
