@@ -45,6 +45,29 @@ export const sendWelcomeEmail = async (email: string, name: string) => {
     console.error(`Error al enviar el correo de bienvenida a ${email}`, error);
   }
 };
+export async function sendApprovalEmail(email: string, name: string, eventName: string): Promise<void> {
+  const subject = 'Tu evento ha sido aprobado';
+  const htmlContent = `
+    <h1>¡Hola ${name}!</h1>
+    <p>Nos complace informarte que tu evento "<strong>${eventName}</strong>" ha sido aprobado.</p>
+    <p>Ya está disponible para el público en nuestra plataforma.</p>
+    <p>Saludos,<br>El equipo de EVENTOP</p>
+  `;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject,
+    html: htmlContent,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Correo de aprobación enviado a ${email}.`);
+  } catch (error) {
+    console.error(`Error al enviar el correo de aprobación a ${email}:`, error);
+  }
+}
 export const notifyAdminsAboutEvent = async (
   adminsEmails: string[],
   clientName: string,

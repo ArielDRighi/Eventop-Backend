@@ -15,6 +15,7 @@ import { getDistance } from 'geolib';
 import { Role } from '@app/auth/enum/roles.enum';
 import { User } from '@app/users/entities/users.entity';
 import { notifyAdminsAboutEvent } from '@app/config/nodeMailer';
+import {sendApprovalEmail} from '@app/config/nodeMailer';
 
 @Injectable()
 export class EventService {
@@ -31,7 +32,7 @@ export class EventService {
 
   async getEvents(): Promise<Event[]> {
     const events = await this.eventRepository.find({
-      relations: { location_id: true, category_id: true },
+      relations: { location_id: true, category_id: true , user: true },
     });
     if (!events.length) {
       throw new NotFoundException('No events found');
@@ -42,7 +43,7 @@ export class EventService {
   async getEventById(eventId: number): Promise<Event> {
     const event = await this.eventRepository.findOne({
       where: { eventId },
-      relations: { location_id: true, category_id: true },
+      relations: { location_id: true, category_id: true, user: true },
     });
     if (!event) {
       throw new HttpException(
@@ -153,6 +154,7 @@ export class EventService {
       where: { eventId }, 
       relations: ['user']  // Relación con el usuario creador
     });
+    console.log('Evento encontrado:', event);
   
     // Si el evento no existe, lanzamos una excepción
     if (!event) {
@@ -179,25 +181,49 @@ export class EventService {
 
   
 
-  async approveEvent(eventId: number, user: User): Promise<Event> {
-    if (user.role !== Role.Admin) {
-      throw new HttpException('Solo los admins pueden aprobar eventos', HttpStatus.FORBIDDEN);
+    async approveEvent(eventId: number, user: User): Promise<Event> {
+      if (user.role !== Role.Admin) {
+        throw new HttpException('Solo los admins pueden aprobar eventos', HttpStatus.FORBIDDEN);
+      }
+      console.log(user.role);
+      
+    
+      const event = await this.eventRepository.findOne({
+        where: { eventId },
+        relations: ['user'], // Incluye la relación con el creador del evento
+      });
+      console.log('Evento encontrado:', event);
+      
+    
+      if (!event) {
+        throw new HttpException('Evento no encontrado', HttpStatus.NOT_FOUND);
+      }
+    
+      event.approved = true;
+    
+      try {
+        const approvedEvent = await this.eventRepository.save(event);
+        console.log(event.user.email, event.user);
+        
+        // Enviar correo al cliente que creó el evento
+        if (event.user && event.user.email) {
+          const email = event.user.email;
+          const name = event.user.name;
+          const eventName = event.name;
+    
+          console.log(`Enviando correo a ${email} para notificar la aprobación del evento "${eventName}".`);
+    
+          await sendApprovalEmail(email, name, eventName);
+          console.log(`Correo de aprobación enviado a ${email}.`);
+        } else {
+          console.log('El evento no tiene un usuario asociado con un email válido.');
+        }
+    
+        return approvedEvent;
+      } catch (error) {
+        throw new HttpException('Fallo en la aprobacion del evento', HttpStatus.BAD_REQUEST);
+      }
     }
-  
-    const event = await this.eventRepository.findOne({ where: { eventId } });
-  
-    if (!event) {
-      throw new HttpException('Evento no encontrado', HttpStatus.NOT_FOUND);
-    }
-  
-    event.approved = true;
-  
-    try {
-      return await this.eventRepository.save(event);
-    } catch (error) {
-      throw new HttpException('Fallo en la aprobacion del evento', HttpStatus.BAD_REQUEST);
-    }
-  }
   
   
 
