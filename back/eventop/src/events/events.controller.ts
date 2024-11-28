@@ -75,7 +75,7 @@ export class EventController {
     }
   }
 
-  @Roles(Role.Admin || Role.Client)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Post('create')
   @ApiBody({ type: CreateEventDto })
@@ -106,7 +106,7 @@ export class EventController {
     }
   }
 
-  @Roles(Role.Admin || Role.Client)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Put(':id')
   @HttpCode(HttpStatus.OK)

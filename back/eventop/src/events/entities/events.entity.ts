@@ -53,7 +53,7 @@ export class Event {
   })
   @JoinColumn({ name: 'category_id' })
   category_id: Category;
-  @ManyToOne(() => User, (user) => user.events, {onDelete: 'CASCADE', nullable: false }) 
+  @ManyToOne(() => User, (user) => user.events, {onDelete: 'CASCADE' }) 
   @JoinColumn({ name: 'user_id' })  
   user: User;  
 }

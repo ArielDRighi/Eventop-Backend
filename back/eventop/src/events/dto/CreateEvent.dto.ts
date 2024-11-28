@@ -1,5 +1,6 @@
 import { User } from '@app/users/entities/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsDate, IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateEventDto {
@@ -26,6 +27,7 @@ export class CreateEventDto {
     description: 'The date of the event',
     required: true,
   })
+  @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
   date: Date;

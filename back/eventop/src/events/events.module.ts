@@ -7,9 +7,10 @@ import { CloudinaryConfig } from 'src/config/cloudinary';
 import { CloudinaryService } from './cloudinary.service';
 import { Category } from 'src/categories/entities/categories.entity';
 import { Location } from 'src/locations/entities/locations.entity';
+import { User } from 'src/users/entities/users.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Event, Location, Category])],
+  imports: [TypeOrmModule.forFeature([Event, Location, Category, User])],
   controllers: [EventController],
   providers: [EventService, CloudinaryService],
 })

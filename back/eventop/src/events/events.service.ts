@@ -14,6 +14,7 @@ import { Location } from '@app/locations/entities/locations.entity';
 import { getDistance } from 'geolib';
 import { Role } from '@app/auth/enum/roles.enum';
 import { User } from '@app/users/entities/users.entity';
+import { notifyAdminsAboutEvent } from '@app/config/nodeMailer';
 
 @Injectable()
 export class EventService {
@@ -24,6 +25,8 @@ export class EventService {
     private readonly locationRepository: Repository<Location>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async getEvents(): Promise<Event[]> {
@@ -49,11 +52,29 @@ export class EventService {
     }
     return event;
   }
-
+  async getAdminEmails(): Promise<string[]> {
+    const admins = await this.userRepository.find({
+      where: { role: Role.Admin },
+      select: ['email'], // Solo necesitamos los correos
+    });
+    return admins.map((admin) => admin.email);
+  }
+  
   async createEvent(createEventDto: CreateEventDto): Promise<Event> {
-    if ( createEventDto.user.role !== Role.Client || Role.Admin) {
-      throw new Error('Solo los usuarios con rol de "client" o "admin" pueden crear eventos.');
+    const user = await this.userRepository.findOne({
+      where: { userId: createEventDto.user_id },
+    });
+  
+    if (!user) {
+      throw new Error(`Usuario con ID ${createEventDto.user_id} no encontrado`);
     }
+  
+    if (user.role !== Role.Client && user.role !== Role.Admin) {
+      throw new Error(
+        'Solo los usuarios con rol de "client" o "admin" pueden crear eventos.',
+      );
+    }
+  
     const {
       name,
       description,
@@ -65,42 +86,62 @@ export class EventService {
       category_id,
       quantityAvailable,
     } = createEventDto;
-
+  
     const location = await this.locationRepository.findOne({
       where: { locationId: location_id },
     });
     if (!location) {
       throw new Error(`Locación con ID ${location_id} no encontrada`);
     }
-
+  
     const category = await this.categoryRepository.findOne({
       where: { categoryId: category_id },
     });
     if (!category) {
-      throw new Error(`Categoria con ID ${category_id} no encontrada`);
+      throw new Error(`Categoría con ID ${category_id} no encontrada`);
     }
-
+  
     const newEvent = this.eventRepository.create({
       name,
       description,
       date,
       price,
       currency,
-      location_id: location, 
+      location_id: location,
       imageUrl,
-      category_id: category, 
+      category_id: category,
       quantityAvailable,
-      user: createEventDto.user,
-      approved: false, 
+      user, // Aquí pasamos el objeto del usuario encontrado
+      approved: false,
     });
-
+  
     const savedEvent = await this.eventRepository.save(newEvent);
+  
+    // Incluimos las relaciones en la consulta final
     const eventWithRelations = await this.eventRepository.findOne({
-      where: { eventId: newEvent.eventId },
+      where: { eventId: savedEvent.eventId },
       relations: ['location_id', 'category_id', 'user'],
     });
+  
+    // Obtener correos de los administradores
+    const adminsEmails = await this.getAdminEmails();
+  
+    if (adminsEmails.length > 0) {
+      console.log('Correos de administradores a los que se enviará la notificación:', adminsEmails);
+      await notifyAdminsAboutEvent(
+        adminsEmails,
+        user.name, // Nombre del cliente que creó el evento
+        newEvent.name, // Nombre del evento creado
+      );
+      console.log(`Notificaciones enviadas a los administradores para el evento "${newEvent.name}".`);
+    } else {
+      console.log('No se encontraron administradores para enviar notificaciones.');
+    }
+  
     return eventWithRelations;
   }
+  
+  
 
   async updateEvent(
     eventId: number,
