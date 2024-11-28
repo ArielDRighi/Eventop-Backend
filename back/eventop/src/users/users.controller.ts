@@ -22,7 +22,13 @@ import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/auth/enum/roles.enum';
 import { RoleGuard } from 'src/auth/roles.guard';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '@app/events/cloudinary.service';
@@ -116,10 +122,38 @@ export class UserController {
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Get('comments')
+  async getAllComments() {
+    try {
+      return await this.userService.getAllComments();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Get(':id')
   async getUserById(@Param('id', ParseIntPipe) userId: number) {
     try {
       return await this.userService.findOneUser(userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Roles(Role.User)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Post(':id/comment')
+  @ApiOperation({ summary: 'Add a comment to a user' })
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiBody({ schema: { example: { comment: 'This is a comment' } } })
+  async addComment(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body('comment') commentText: string,
+  ) {
+    try {
+      return await this.userService.addComment(userId, commentText);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

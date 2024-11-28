@@ -12,13 +12,14 @@ import { Repository } from 'typeorm';
 import { User } from './entities/users.entity';
 import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
-import { use } from 'passport';
-import { log } from 'console';
+import { Comment } from './entities/comments.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
   ) {}
 
   async findOneUser(userId: number): Promise<User> {
@@ -98,6 +99,47 @@ export class UserService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al actualizar el usuario',
+        error,
+      );
+    }
+  }
+
+  async addComment(userId: number, commentText: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { userId },
+        relations: ['comments'],
+      });
+      if (!user) {
+        throw new HttpException(
+          `User with ID ${userId} not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const comment = this.commentRepository.create({ text: commentText });
+      await this.commentRepository.save(comment);
+
+      user.comments.push(comment);
+      await this.userRepository.save(user);
+      return comment;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Error at adding comment', error);
+    }
+  }
+
+  async getAllComments(): Promise<{ message: string; comments: Comment[] }> {
+    try {
+      const comments = await this.commentRepository.find({
+        relations: ['user'],
+      });
+      if (!comments) {
+        throw new NotFoundException('No comments found');
+      }
+      return { message: 'Comments found', comments };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error at getting comments',
         error,
       );
     }
