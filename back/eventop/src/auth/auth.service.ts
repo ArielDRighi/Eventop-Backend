@@ -105,4 +105,24 @@ export class AuthService {
     }
     return user;
   }
+
+  // async handleAuth0Callback(auth0User: any) {
+  //   const { email, name } = auth0User;
+  //   const user = await this.userService.findOneByEmail(email);
+  //   if (!user) {
+  //     // Creamos un password aleatorio
+  //     const password = Math.random().toString(36).substring(7);
+  //     const hashedPassword = await bcrypt.hash(password, 10);
+  //     const createUserDto: CreateUserDto = {
+  //       email,
+  //       name,
+  //       password: hashedPassword,
+  //       confirmPassword: hashedPassword,
+  //     }; // La contraseña puede ser nula para usuarios de OAuth
+  //     await this.mailService.sendPassword(email, password);
+  //     const createdUser = await this.userService.createUser(createUserDto);
+  //     return createdUser;
+  //   }
+  //   throw new BadRequestException('El usuario ya existe');
+  // }
 }
