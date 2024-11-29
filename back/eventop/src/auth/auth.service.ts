@@ -6,6 +6,8 @@ import { UserService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { sendWelcomeEmail } from '@app/config/nodeMailer';
 import { MailService } from '@app/mail/mail.service';
+import { Role } from './enum/roles.enum';
+import { User } from '../users/entities/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -86,9 +88,9 @@ export class AuthService {
 
   async handleAuth0Callback(auth0User: any) {
     const { email, name } = auth0User;
-    const user = await this.userService.findOneByEmail(email);
+    let user = await this.userService.findOneByEmail(email);
     if (!user) {
-      // Creamos un password aleatorio
+      // Crear un nuevo usuario con el rol necesario
       const password = Math.random().toString(36).substring(7);
       const hashedPassword = await bcrypt.hash(password, 10);
       const createUserDto: CreateUserDto = {
@@ -96,11 +98,11 @@ export class AuthService {
         name,
         password: hashedPassword,
         confirmPassword: hashedPassword,
-      }; // La contraseña puede ser nula para usuarios de OAuth
+        role: Role.User, // Asignar el rol necesario
+      };
       await this.mailService.sendPassword(email, password);
-      const createdUser = await this.userService.createUser(createUserDto);
-      return createdUser;
+      user = (await this.userService.createUser(createUserDto)) as User;
     }
-    throw new BadRequestException('El usuario ya existe');
+    return user;
   }
 }

@@ -43,17 +43,6 @@ export class AuthController {
     }
   }
 
-  // @Get('auth0/protected')
-  // @HttpCode(HttpStatus.OK)
-  // async getAuth0Protected(@Req() req: Request) {
-  //   try {
-  //     console.log(JSON.stringify(request.oidc.idToken));
-  //     return JSON.stringify(request.oidc.user);
-  //   } catch (error) {
-  //     throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-  //   }
-  // }
-
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'))
   @Get('protected')
