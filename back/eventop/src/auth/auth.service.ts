@@ -5,12 +5,14 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { sendWelcomeEmail } from '@app/config/nodeMailer';
+import { MailService } from '@app/mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async signIn(credential: SignInAuthDto) {
@@ -80,5 +82,25 @@ export class AuthService {
 
     // Devolvemos el usuario creado (sin la contraseña)
     return { ...createdUser, password: undefined };
+  }
+
+  async handleAuth0Callback(auth0User: any) {
+    const { email, name } = auth0User;
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) {
+      // Creamos un password aleatorio
+      const password = Math.random().toString(36).substring(7);
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const createUserDto: CreateUserDto = {
+        email,
+        name,
+        password: hashedPassword,
+        confirmPassword: hashedPassword,
+      }; // La contraseña puede ser nula para usuarios de OAuth
+      await this.mailService.sendPassword(email, password);
+      const createdUser = await this.userService.createUser(createUserDto);
+      return createdUser;
+    }
+    throw new BadRequestException('El usuario ya existe');
   }
 }
