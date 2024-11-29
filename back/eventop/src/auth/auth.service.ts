@@ -98,7 +98,7 @@ export class AuthService {
         name,
         password: hashedPassword,
         confirmPassword: hashedPassword,
-        role: Role.User, // Asignar el rol necesario
+        role: Role.User,
       };
       await this.mailService.sendPassword(email, password);
       user = (await this.userService.createUser(createUserDto)) as User;
