@@ -17,13 +17,15 @@ import {
 import { EventService } from './events.service';
 import { CreateEventDto } from './dto/CreateEvent.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { Roles } from '@app/decorators/roles.decorator';
 import { Role } from '@app/auth/enum/roles.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from '@app/auth/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from './cloudinary.service';
+import { User } from '@app/users/entities/users.entity';
+import { Request } from '@nestjs/common';
 
 @ApiTags('events')
 @ApiBearerAuth('access-token')
@@ -73,9 +75,10 @@ export class EventController {
     }
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Post('create')
+  @ApiBody({ type: CreateEventDto })
   @UseInterceptors(FileInterceptor('image'))
   async createEvent(
     @Body('data') data: any, // Lo recibimos como 'any' para manejar el texto JSON.
@@ -103,44 +106,59 @@ export class EventController {
     }
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   async updateEvent(
     @Param('id') eventId: number,
     @Body() updateEventDto: UpdateEventDto,
-  ) {
+    @Request() req,
+  ){const user = req.user;
+    console.log(updateEventDto);
+    
     try {
-      return await this.eventService.updateEvent(eventId, updateEventDto);
+      return await this.eventService.updateEvent(eventId, updateEventDto, user );
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   @Roles(Role.Admin)
-  @UseGuards(AuthGuard('jwt'), RoleGuard)
-  @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  async deleteEvent(@Param('id') eventId: number) {
-    try {
-      return await this.eventService.deleteEvent(eventId);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+@UseGuards(AuthGuard('jwt'), RoleGuard)
+@Delete(':id')
+@HttpCode(HttpStatus.OK)
+async deleteEvent(
+  @Param('id') eventId: number,  
+  @Request() req, 
+) {
+  const user = req.user;
+  
+  try {
+    return await this.eventService.deleteEvent(eventId, user);
+  } catch (error) {
+    throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
   }
+}
 
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard('jwt'), RoleGuard)
-  @Put(':id/approve')
-  @HttpCode(HttpStatus.OK)
-  async approveEvent(@Param('id') eventId: number) {
-    try {
-      return await this.eventService.approveEvent(eventId);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+
+@Roles(Role.Admin)  
+@UseGuards(AuthGuard('jwt'), RoleGuard)
+@Put(':id/approve') 
+@HttpCode(HttpStatus.OK)
+async approveEvent(
+  @Param('id') eventId: number,  
+  @Request() req, 
+) {
+  const user = req.user; 
+
+  try {
+    return await this.eventService.approveEvent(eventId, user);
+  } catch (error) {
+    throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
   }
+}
+
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)

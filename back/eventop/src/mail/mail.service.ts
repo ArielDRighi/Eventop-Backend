@@ -26,4 +26,15 @@ export class MailService {
       text,
     });
   }
+
+  async sendPassword(email: string, password: string) {
+    const subject = 'Tu contraseña de eventop';
+    const text = `Tu nueva contraseña es: ${password}. Recuerda cambiarla en tu perfil.`;
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject,
+      text,
+    });
+  }
 }

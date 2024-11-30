@@ -14,6 +14,7 @@ import { sendPurchaseEmail } from '@app/config/nodeMailer';
 import { UserService } from '@app/users/users.service';
 import { PaymentDto } from './dto/Payment.dto';
 import { config as dotenvConfig } from 'dotenv';
+import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway';
 
 dotenvConfig({ path: '.env' });
 
@@ -28,12 +29,13 @@ export class PaymentService {
     private readonly eventRepository: Repository<Event>,
     private readonly eventService: EventService,
     private readonly userService: UserService,
+    private readonly monitorInventarioGateway: MonitorInventarioGateway,
   ) {}
 
   async createPreference(data: PaymentDto) {
     const { eventId, email, quantity } = data;
 
-    const event = await this.eventService.getEventById(eventId);
+    const event = await this.eventService.getEventById(Number(eventId));
     const discountQuantity = await this.eventService.discountQuantity(
       eventId,
       Number(quantity),
@@ -62,6 +64,7 @@ export class PaymentService {
     const preference = new Preference(client);
 
     try {
+      // Crear la preferencia
       const response = await preference.create({
         body: {
           items: [
@@ -84,11 +87,36 @@ export class PaymentService {
           auto_return: 'approved',
         },
       });
+
+      // Obtener la cantidad actualizada de entradas disponibles
+      const updatedInventoryCount = await this.getUpdatedInventoryCount(
+        eventId.toString(),
+      );
+
+      // Transmitir la actualización de inventario
+      this.monitorInventarioGateway.broadcastInventoryUpdate(
+        updatedInventoryCount,
+      );
+
       await sendPurchaseEmail(email, name, event.name);
+
+      // Verificar si la preferencia fue creada correctamente y si la transacción fue aprobada
+      if (response.auto_return === 'approved') {
+        // Solo enviar el correo si el pago fue aprobado
+        await sendPurchaseEmail(email, name, event.name);
+      } else {
+        console.log('El pago no fue aprobado, no se enviará el correo');
+      }
+
       return response.id;
     } catch (error) {
       console.log('Error', error);
       throw error;
     }
+  }
+
+  private async getUpdatedInventoryCount(eventId: string): Promise<number> {
+    const event = await this.eventService.getEventById(Number(eventId));
+    return event.availableTickets; // Suponiendo que el evento tiene una propiedad availableTickets
   }
 }
