@@ -5,12 +5,16 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { sendWelcomeEmail } from '@app/config/nodeMailer';
+import { MailService } from '@app/mail/mail.service';
+import { Role } from './enum/roles.enum';
+import { User } from '@app/users/entities/users.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async signIn(credential: SignInAuthDto) {
@@ -80,5 +84,37 @@ export class AuthService {
 
     // Devolvemos el usuario creado (sin la contraseña)
     return { ...createdUser, password: undefined };
+  }
+
+  async handleAuth0Callback(auth0User: any) {
+    console.log('handleAuth0Callback called');
+    const { email, name } = auth0User;
+    console.log('Auth0 User:', auth0User);
+
+    let user = await this.userService.findOneByEmail(email);
+    console.log('User found in DB:', user);
+
+    if (!user) {
+      console.log('User not found, creating a new user');
+      // Crear un nuevo usuario con el rol necesario
+      const password = Math.random().toString(36).substring(7);
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const createUserDto: CreateUserDto = {
+        email,
+        name,
+        password: hashedPassword,
+        confirmPassword: hashedPassword,
+        role: Role.User,
+      };
+      console.log('CreateUserDto:', createUserDto);
+
+      await this.mailService.sendPassword(email, password);
+      console.log('Password email sent to:', email);
+
+      user = (await this.userService.createUser(createUserDto)) as User;
+      console.log('New user created:', user);
+    }
+
+    return user;
   }
 }

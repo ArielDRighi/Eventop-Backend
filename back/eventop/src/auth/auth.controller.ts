@@ -9,6 +9,7 @@ import {
   Request,
   Req,
   Get,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signIn.dto';
@@ -63,5 +64,15 @@ export class AuthController {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  @Get('callback')
+  @UseGuards(AuthGuard('auth0'))
+  async authCallback(@Req() req, @Res() res) {
+    console.log('C authCallback', req);
+    console.log('C authCallback user', req.user);
+    const { user } = req;
+    await this.authService.handleAuth0Callback(user);
+    res.redirect('/'); // Redirige a la ruta deseada después del inicio de sesión exitoso
   }
 }
