@@ -57,13 +57,14 @@ export class UserController {
   }
 
   @Post('create')
-  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a user' })
+  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Email already registered or banned.',
+  })
   async createUser(@Body() createUserDto: CreateUserDto) {
-    try {
-      return await this.userService.createUser(createUserDto);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
-    }
+    return await this.userService.createUser(createUserDto);
   }
 
   @Roles(Role.Admin)
