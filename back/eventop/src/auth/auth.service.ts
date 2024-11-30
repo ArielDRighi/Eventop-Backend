@@ -17,32 +17,32 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  // async signIn(credential: SignInAuthDto) {
-  //   const dbUser = await this.userService.findOneByEmail(credential.email);
-  //   if (!dbUser) {
-  //     throw new BadRequestException('Usuario no encontrado');
-  //   }
-  //   if (dbUser.isBanned) {
-  //     throw new BadRequestException(`Usuario baneado: ${dbUser.banReason}`);
-  //   }
-  //   const isPasswordValid = await bcrypt.compare(
-  //     credential.password,
-  //     dbUser.password,
-  //   );
-  //   if (!isPasswordValid) {
-  //     throw new BadRequestException('Contraseña invalida');
-  //   }
-  //   const payload = {
-  //     username: dbUser.email,
-  //     sub: dbUser.userId,
-  //     role: dbUser.role,
-  //   };
-  //   return {
-  //     accessToken: this.jwtService.sign(payload),
-  //   };
-  // }
+  async signIn(credential: SignInAuthDto) {
+    const dbUser = await this.userService.findOneByEmail(credential.email);
+    if (!dbUser) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+    if (dbUser.isBanned) {
+      throw new BadRequestException(`Usuario baneado: ${dbUser.banReason}`);
+    }
+    const isPasswordValid = await bcrypt.compare(
+      credential.password,
+      dbUser.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Contraseña invalida');
+    }
+    const payload = {
+      username: dbUser.email,
+      sub: dbUser.userId,
+      role: dbUser.role,
+    };
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
+  }
 
-  async signIn(user: User) {
+  async signInOauth(user: User) {
     const payload = {
       username: user.email,
       sub: user.userId,

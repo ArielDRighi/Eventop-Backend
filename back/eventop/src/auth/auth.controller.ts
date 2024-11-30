@@ -16,7 +16,13 @@ import { SignInAuthDto } from './dto/signIn.dto';
 import { CreateUserDto } from './dto/createUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { request } from 'express';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { Public } from '@app/decorators/public.decorator';
 import { User } from '@app/users/entities/users.entity';
@@ -28,9 +34,23 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body() user: User) {
+  async signIn(@Body() CreateUserDto: SignInAuthDto) {
     try {
-      return await this.authService.signIn(user);
+      return await this.authService.signIn(CreateUserDto);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
+
+  @Post('signinoauth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sign in with OAuth' })
+  @ApiResponse({ status: 200, description: 'Successfully signed in' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiBody({ type: User })
+  async signInOauth(@Body() user: User) {
+    try {
+      return await this.authService.signInOauth(user);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
@@ -61,13 +81,20 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
+  @ApiOperation({ summary: 'Login with Google' })
   googleLogin() {}
 
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
+  @ApiOperation({ summary: 'Google OAuth callback' })
   async googleCallback(@Req() req, @Res() res) {
-    const response = await this.authService.signIn(req.user);
+<<<<<<< HEAD
+    const response = await this.authService.signInOauth(req.user);
     res.redirect(`http://localhost:5173?token=${response.accessToken}`);
+=======
+    const response = await this.authService.signIn(req.user);
+    res.redirect(`http://localhost:3001?token=${response.accessToken}`);
+>>>>>>> 4ac36e831116be6603a9abfb5034cbfd85c80478
   }
 }
