@@ -61,13 +61,14 @@ export class EventService {
     return admins.map((admin) => admin.email);
   }
   
-  async createEvent(createEventDto: CreateEventDto): Promise<Event> {
+  async createEvent(createEventDto: CreateEventDto, userId: number): Promise<Event> {
     const user = await this.userRepository.findOne({
-      where: { userId: createEventDto.user_id },
+      where: { userId },
     });
+    console.log(user);
   
     if (!user) {
-      throw new Error(`Usuario con ID ${createEventDto.user_id} no encontrado`);
+      throw new Error(`Usuario con ID ${userId} no encontrado`);
     }
   
     if (user.role !== Role.Client && user.role !== Role.Admin) {
@@ -169,11 +170,24 @@ export class EventService {
       const updatedEvent = {
         ...updateEventDto,
         approved:false}
-      console.log("update", updatedEvent);
+
       Object.assign(event, updatedEvent);
-      console.log("event", updatedEvent);
+      console.log("nombre",event.user.name);
+
       try {     
-        
+        const adminsEmails = await this.getAdminEmails();
+  
+    if (adminsEmails.length > 0) {
+      console.log('Correos de administradores a los que se enviará la notificación:', adminsEmails);
+      await notifyAdminsAboutEvent(
+        adminsEmails,
+        event.user.name, // Nombre del cliente que creó el evento
+        event.name, // Nombre del evento creado
+      );
+      console.log(`Notificaciones enviadas a los administradores para el evento "${event.name}".`);
+    } else {
+      console.log('No se encontraron administradores para enviar notificaciones.');
+    }
         return await this.eventRepository.save(event);
       } catch (error) {
         throw new HttpException('falla en la actualizacion', HttpStatus.BAD_REQUEST);

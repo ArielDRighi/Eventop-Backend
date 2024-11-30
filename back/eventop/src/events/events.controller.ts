@@ -83,13 +83,18 @@ export class EventController {
   async createEvent(
     @Body('data') data: any, // Lo recibimos como 'any' para manejar el texto JSON.
     @UploadedFile() file: Express.Multer.File,
+    @Request() req,
   ) {
+
     try {
+      const userId = req.user.userId;
+      console.log(userId);
       // Parseamos el campo body que contiene el JSON.
       const createEventDto: CreateEventDto = JSON.parse(data);
 
       // Subimos la imagen a Cloudinary y obtenemos la URL
       const imageUrl = await this.cloudinaryService.uploadImage(file);
+
 
       // Creamos el evento
       const event = {
@@ -98,7 +103,7 @@ export class EventController {
       };
 
       // Guardamos el evento en la base de datos
-      const eventCreated = await this.eventService.createEvent(event);
+      const eventCreated = await this.eventService.createEvent(event, userId);
 
       return { message: 'Evento creado exitosamente', eventCreated };
     } catch (error) {
