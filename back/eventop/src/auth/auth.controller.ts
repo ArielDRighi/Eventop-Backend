@@ -69,6 +69,8 @@ export class AuthController {
   @Get('callback')
   @UseGuards(AuthGuard('auth0'))
   async authCallback(@Req() req, @Res() res) {
+    console.log('C authCallback', req);
+    console.log('C authCallback user', req.user);
     const { user } = req;
     await this.authService.handleAuth0Callback(user);
     res.redirect('/'); // Redirige a la ruta deseada después del inicio de sesión exitoso
