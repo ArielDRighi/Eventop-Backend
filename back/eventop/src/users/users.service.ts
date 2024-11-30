@@ -14,6 +14,7 @@ import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { Comment } from './entities/comments.entity';
 import { MailService } from '../mail/mail.service';
+import { BannedEmail } from './entities/banned-email.entity';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,8 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(Comment)
     private readonly commentRepository: Repository<Comment>,
+    @InjectRepository(BannedEmail)
+    private readonly bannedEmailRepository: Repository<BannedEmail>,
     private readonly mailService: MailService,
   ) {}
 
@@ -35,6 +38,15 @@ export class UserService {
 
   async createUser(user: CreateUserDto): Promise<Partial<User>> {
     const { email, name, password, role } = user;
+
+    const bannedEmail = await this.bannedEmailRepository.findOne({
+      where: { email },
+    });
+    if (bannedEmail) {
+      throw new ConflictException(
+        'El correo electrónico está baneado permanentemente',
+      );
+    }
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
@@ -155,7 +167,13 @@ export class UserService {
 
     if (permanent) {
       try {
+        const bannedEmail = this.bannedEmailRepository.create({
+          email: user.email,
+        });
+        await this.bannedEmailRepository.save(bannedEmail);
+
         await this.userRepository.remove(user);
+
         await this.mailService.sendBanNotification(
           user.email,
           reason,
