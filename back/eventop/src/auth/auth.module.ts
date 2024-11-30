@@ -8,17 +8,19 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailService } from '@app/mail/mail.service';
+import googleOauthConfig from '@app/config/google-oauth.config';
+import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule, ConfigModule.forFeature(googleOauthConfig)],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         const secret = configService.get<string>('JWT_SECRET');
-        console.log('JWT_SECRET:', secret); // Ahora la consola está fuera de la devolución
+        console.log('JWT_SECRET:', secret);
         return {
           secret,
           signOptions: { expiresIn: '60m' },
@@ -26,7 +28,7 @@ import { MailService } from '@app/mail/mail.service';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, MailService],
+  providers: [AuthService, JwtStrategy, MailService, GoogleStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
