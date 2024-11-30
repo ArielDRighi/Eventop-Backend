@@ -17,28 +17,39 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  async signIn(credential: SignInAuthDto) {
-    const dbUser = await this.userService.findOneByEmail(credential.email);
-    if (!dbUser) {
-      throw new BadRequestException('Usuario no encontrado');
-    }
-    if (dbUser.isBanned) {
-      throw new BadRequestException(`Usuario baneado: ${dbUser.banReason}`);
-    }
-    const isPasswordValid = await bcrypt.compare(
-      credential.password,
-      dbUser.password,
-    );
-    if (!isPasswordValid) {
-      throw new BadRequestException('Contraseña invalida');
-    }
+  // async signIn(credential: SignInAuthDto) {
+  //   const dbUser = await this.userService.findOneByEmail(credential.email);
+  //   if (!dbUser) {
+  //     throw new BadRequestException('Usuario no encontrado');
+  //   }
+  //   if (dbUser.isBanned) {
+  //     throw new BadRequestException(`Usuario baneado: ${dbUser.banReason}`);
+  //   }
+  //   const isPasswordValid = await bcrypt.compare(
+  //     credential.password,
+  //     dbUser.password,
+  //   );
+  //   if (!isPasswordValid) {
+  //     throw new BadRequestException('Contraseña invalida');
+  //   }
+  //   const payload = {
+  //     username: dbUser.email,
+  //     sub: dbUser.userId,
+  //     role: dbUser.role,
+  //   };
+  //   return {
+  //     accessToken: this.jwtService.sign(payload),
+  //   };
+  // }
+
+  async signIn(user: User) {
     const payload = {
-      username: dbUser.email,
-      sub: dbUser.userId,
-      role: dbUser.role,
+      username: user.email,
+      sub: user.userId,
+      role: user.role,
     };
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
@@ -86,35 +97,9 @@ export class AuthService {
     return { ...createdUser, password: undefined };
   }
 
-  async handleAuth0Callback(auth0User: any) {
-    console.log('handleAuth0Callback called');
-    const { email, name } = auth0User;
-    console.log('Auth0 User:', auth0User);
-
-    let user = await this.userService.findOneByEmail(email);
-    console.log('User found in DB:', user);
-
-    if (!user) {
-      console.log('User not found, creating a new user');
-      // Crear un nuevo usuario con el rol necesario
-      const password = Math.random().toString(36).substring(7);
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const createUserDto: CreateUserDto = {
-        email,
-        name,
-        password: hashedPassword,
-        confirmPassword: hashedPassword,
-        role: Role.User,
-      };
-      console.log('CreateUserDto:', createUserDto);
-
-      await this.mailService.sendPassword(email, password);
-      console.log('Password email sent to:', email);
-
-      user = (await this.userService.createUser(createUserDto)) as User;
-      console.log('New user created:', user);
-    }
-
-    return user;
+  async validateGoogleUser(googleUser: CreateUserDto) {
+    const user = await this.userService.findOneByEmail(googleUser.email);
+    if (user) return user;
+    return await this.userService.createUser(googleUser);
   }
 }

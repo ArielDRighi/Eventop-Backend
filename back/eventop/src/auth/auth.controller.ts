@@ -17,6 +17,9 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { request } from 'express';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
+import { Public } from '@app/decorators/public.decorator';
+import { User } from '@app/users/entities/users.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -25,9 +28,9 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
-  async signIn(@Body() credential: SignInAuthDto) {
+  async signIn(@Body() user: User) {
     try {
-      return await this.authService.signIn(credential);
+      return await this.authService.signIn(user);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
@@ -43,17 +46,6 @@ export class AuthController {
     }
   }
 
-  // @Get('auth0/protected')
-  // @HttpCode(HttpStatus.OK)
-  // async getAuth0Protected(@Req() req: Request) {
-  //   try {
-  //     console.log(JSON.stringify(request.oidc.idToken));
-  //     return JSON.stringify(request.oidc.user);
-  //   } catch (error) {
-  //     throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-  //   }
-  // }
-
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'))
   @Get('protected')
@@ -66,11 +58,16 @@ export class AuthController {
     }
   }
 
-  @Get('callback')
-  @UseGuards(AuthGuard('auth0'))
-  async authCallback(@Req() req, @Res() res) {
-    const { user } = req;
-    await this.authService.handleAuth0Callback(user);
-    res.redirect('/'); // Redirige a la ruta deseada después del inicio de sesión exitoso
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/login')
+  googleLogin() {}
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleCallback(@Req() req, @Res() res) {
+    const response = await this.authService.signIn(req.user);
+    res.redirect(`http://localhost:5173?token=${response.accessToken}`);
   }
 }
