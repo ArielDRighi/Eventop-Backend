@@ -11,12 +11,13 @@ import { PaymentModule } from './payment/payment.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-inventario.gateway';
+import googleOauthConfig from './config/google-oauth.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [TypeOrmConfig],
+      load: [TypeOrmConfig, googleOauthConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
