@@ -87,6 +87,7 @@ export class AuthService {
   }
 
   async handleAuth0Callback(auth0User: any) {
+    console.log('handleAuth0Callback called');
     const { email, name } = auth0User;
     console.log('Auth0 User:', auth0User);
 
