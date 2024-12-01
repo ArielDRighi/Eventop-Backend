@@ -90,6 +90,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.signIn(req.user);
-    res.redirect(`http://localhost:5173?token=${response.accessToken}`);
+    res.redirect(`http://localhost:3001?token=${response.accessToken}`);
   }
 }
