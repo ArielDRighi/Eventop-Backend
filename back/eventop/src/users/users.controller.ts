@@ -81,6 +81,7 @@ export class UserController {
     }
   }
 
+  @Roles(Role.Admin, Role.User, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Put(':id')
   async updateUser(
@@ -94,6 +95,7 @@ export class UserController {
     }
   }
 
+  @Roles(Role.Admin, Role.User, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Post(':id/upload-image')
   @UseInterceptors(FileInterceptor('image'))
@@ -135,7 +137,7 @@ export class UserController {
     }
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.User, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Get(':id')
   async getUserById(@Param('id', ParseIntPipe) userId: number) {
@@ -146,7 +148,7 @@ export class UserController {
     }
   }
 
-  @Roles(Role.User)
+  @Roles(Role.User, Role.Client, Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Post(':id/comment')
   @ApiOperation({ summary: 'Add a comment to a user' })
