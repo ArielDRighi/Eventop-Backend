@@ -38,15 +38,10 @@ export class MonitorInventarioGateway
     return 'Message received';
   }
 
-  // Método para transmitir cambios de inventario
-  broadcastInventoryUpdate(inventoryCount: number) {
-    this.server.emit('inventoryUpdate', inventoryCount);
+    // Método para transmitir cambios de inventario
+    broadcastInventoryUpdate(eventId: number, quantityAvailable: number) {
+      this.server.emit('inventoryUpdate', { eventId, quantityAvailable });
+    }
   }
 
-  // Emitir un evento de prueba cada 5 segundos
-  emitTestEvent() {
-    setInterval(() => {
-      this.server.emit('inventoryUpdate', { eventId: 1, availableTickets: Math.floor(Math.random() * 100) });
-    }, 5000);
-  }
-}
+ 

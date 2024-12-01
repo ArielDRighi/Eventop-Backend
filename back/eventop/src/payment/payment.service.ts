@@ -90,11 +90,12 @@ export class PaymentService {
 
       // Obtener la cantidad actualizada de entradas disponibles
       const updatedInventoryCount = await this.getUpdatedInventoryCount(
-        eventId.toString(),
+        Number(eventId),
       );
 
       // Transmitir la actualización de inventario
       this.monitorInventarioGateway.broadcastInventoryUpdate(
+        Number(eventId),
         updatedInventoryCount,
       );
 
@@ -115,8 +116,8 @@ export class PaymentService {
     }
   }
 
-  private async getUpdatedInventoryCount(eventId: string): Promise<number> {
-    const event = await this.eventService.getEventById(Number(eventId));
-    return event.availableTickets; // Suponiendo que el evento tiene una propiedad availableTickets
+  private async getUpdatedInventoryCount(eventId: number): Promise<number> {
+    const event = await this.eventService.getEventById(eventId);
+    return event.quantityAvailable; // Suponiendo que el evento tiene una propiedad quantityAvailable
   }
 }
