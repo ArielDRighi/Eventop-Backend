@@ -9,7 +9,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class MonitorInventarioGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -33,8 +37,16 @@ export class MonitorInventarioGateway
     console.log('Message received:', data);
     return 'Message received';
   }
-   // Método para transmitir cambios de inventario
-   broadcastInventoryUpdate(inventoryCount: number) {
+
+  // Método para transmitir cambios de inventario
+  broadcastInventoryUpdate(inventoryCount: number) {
     this.server.emit('inventoryUpdate', inventoryCount);
+  }
+
+  // Emitir un evento de prueba cada 5 segundos
+  emitTestEvent() {
+    setInterval(() => {
+      this.server.emit('inventoryUpdate', { eventId: 1, availableTickets: Math.floor(Math.random() * 100) });
+    }, 5000);
   }
 }
