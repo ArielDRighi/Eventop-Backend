@@ -74,7 +74,10 @@ export class EventController {
     @Param('eventId') eventId: number,
     @Param('quantityAvailable') quantityAvailable: number,
   ) {
-    this.monitorInventarioGateway.broadcastInventoryUpdate(eventId, quantityAvailable);
+    this.monitorInventarioGateway.broadcastInventoryUpdate(
+      eventId,
+      quantityAvailable,
+    );
     return { message: 'Broadcast test executed' };
   }
 
@@ -98,7 +101,6 @@ export class EventController {
     @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
-
     try {
       const userId = req.user.userId;
       console.log(userId);
@@ -107,7 +109,6 @@ export class EventController {
 
       // Subimos la imagen a Cloudinary y obtenemos la URL
       const imageUrl = await this.cloudinaryService.uploadImage(file);
-
 
       // Creamos el evento
       const event = {
@@ -132,51 +133,44 @@ export class EventController {
     @Param('id') eventId: number,
     @Body() updateEventDto: UpdateEventDto,
     @Request() req,
-  ){const user = req.user;
+  ) {
+    const user = req.user;
     console.log(updateEventDto);
-    
+
     try {
-      return await this.eventService.updateEvent(eventId, updateEventDto, user );
+      return await this.eventService.updateEvent(eventId, updateEventDto, user);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
   @Roles(Role.Admin)
-@UseGuards(AuthGuard('jwt'), RoleGuard)
-@Delete(':id')
-@HttpCode(HttpStatus.OK)
-async deleteEvent(
-  @Param('id') eventId: number,  
-  @Request() req, 
-) {
-  const user = req.user;
-  
-  try {
-    return await this.eventService.deleteEvent(eventId, user);
-  } catch (error) {
-    throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deleteEvent(@Param('id') eventId: number, @Request() req) {
+    const userId = req.user.userId;
+
+    try {
+      return await this.eventService.deleteEvent(eventId, userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
-}
 
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  async approveEvent(@Param('id') eventId: number, @Request() req) {
+    const user = req.user;
 
-@Roles(Role.Admin)  
-@UseGuards(AuthGuard('jwt'), RoleGuard)
-@Put(':id/approve') 
-@HttpCode(HttpStatus.OK)
-async approveEvent(
-  @Param('id') eventId: number,  
-  @Request() req, 
-) {
-  const user = req.user; 
-
-  try {
-    return await this.eventService.approveEvent(eventId, user);
-  } catch (error) {
-    throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    try {
+      return await this.eventService.approveEvent(eventId, user);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
-}
-
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)

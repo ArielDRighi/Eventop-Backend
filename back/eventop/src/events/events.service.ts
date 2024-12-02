@@ -71,11 +71,11 @@ export class EventService {
     console.log(user);
 
     if (!user) {
-      throw new Error(`Usuario con ID ${userId} no encontrado`);
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
     }
 
     if (user.role !== Role.Client && user.role !== Role.Admin) {
-      throw new Error(
+      throw new NotFoundException(
         'Solo los usuarios con rol de "client" o "admin" pueden crear eventos.',
       );
     }
@@ -96,14 +96,18 @@ export class EventService {
       where: { locationId: location_id },
     });
     if (!location) {
-      throw new Error(`Locación con ID ${location_id} no encontrada`);
+      throw new NotFoundException(
+        `Locación con ID ${location_id} no encontrada`,
+      );
     }
 
     const category = await this.categoryRepository.findOne({
       where: { categoryId: category_id },
     });
     if (!category) {
-      throw new Error(`Categoría con ID ${category_id} no encontrada`);
+      throw new NotFoundException(
+        `Categoría con ID ${category_id} no encontrada`,
+      );
     }
 
     const newEvent = this.eventRepository.create({
@@ -142,7 +146,7 @@ export class EventService {
         newEvent.name, // Nombre del evento creado
       );
       console.log(
-        `Notificaciones enviadas a los administradores para el evento "${newEvent.name}".`,
+        `Notificaciones enviadas a los administradores para el evento "${newEvent.name}"`,
       );
     } else {
       console.log(
@@ -204,7 +208,7 @@ export class EventService {
             event.name, // Nombre del evento creado
           );
           console.log(
-            `Notificaciones enviadas a los administradores para el evento "${event.name}".`,
+            `Notificaciones enviadas a los administradores para el evento "${event.name}"`,
           );
         } else {
           console.log(
@@ -264,7 +268,7 @@ export class EventService {
         );
 
         await sendApprovalEmail(email, name, eventName);
-        console.log(`Correo de aprobación enviado a ${email}.`);
+        console.log(`Correo de aprobación enviado a ${email}`);
       } else {
         console.log(
           'El evento no tiene un usuario asociado con un email válido.',
@@ -282,7 +286,7 @@ export class EventService {
 
   async deleteEvent(
     eventId: number,
-    user: User, // Asegúrate de pasar el usuario autenticado
+    userId: number,
   ): Promise<{ message: string }> {
     const event = await this.eventRepository.findOne({
       where: { eventId },
@@ -297,7 +301,7 @@ export class EventService {
     }
 
     // Verificar si el usuario autenticado es el creador del evento
-    if (event.user.userId !== user.userId) {
+    if (event.user.userId !== userId) {
       throw new HttpException(
         'No tienes permisos para eliminar este evento',
         HttpStatus.FORBIDDEN,
