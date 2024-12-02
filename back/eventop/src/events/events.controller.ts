@@ -144,7 +144,7 @@ export class EventController {
     }
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)

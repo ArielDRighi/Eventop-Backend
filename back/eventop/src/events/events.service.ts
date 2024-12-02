@@ -293,6 +293,8 @@ export class EventService {
       relations: ['user'],
     });
 
+    const user = await this.userRepository.findOne({ where: { userId } });
+
     if (!event) {
       throw new HttpException(
         `Evento con ID ${eventId} no encontrado`,
@@ -300,8 +302,7 @@ export class EventService {
       );
     }
 
-    // Verificar si el usuario autenticado es el creador del evento
-    if (event.user.userId !== userId) {
+    if (user.role !== Role.Admin && event.user.userId !== user.userId) {
       throw new HttpException(
         'No tienes permisos para eliminar este evento',
         HttpStatus.FORBIDDEN,
