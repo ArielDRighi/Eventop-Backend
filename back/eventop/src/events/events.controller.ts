@@ -26,6 +26,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from './cloudinary.service';
 import { User } from '@app/users/entities/users.entity';
 import { Request } from '@nestjs/common';
+import { MonitorInventarioGateway } from '@app/gateways/monitor-inventario/monitor-inventario.gateway';
 
 @ApiTags('events')
 @ApiBearerAuth('access-token')
@@ -34,6 +35,7 @@ export class EventController {
   constructor(
     private readonly eventService: EventService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly monitorInventarioGateway: MonitorInventarioGateway,
   ) {}
 
   @Get()
@@ -65,6 +67,17 @@ export class EventController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  //Metodo solo para testear el broadcast y ver si llega la info
+  @Get('test-broadcast/:eventId/:quantityAvailable')
+  testBroadcast(
+    @Param('eventId') eventId: number,
+    @Param('quantityAvailable') quantityAvailable: number,
+  ) {
+    this.monitorInventarioGateway.broadcastInventoryUpdate(eventId, quantityAvailable);
+    return { message: 'Broadcast test executed' };
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getEventById(@Param('id') eventId: number) {
