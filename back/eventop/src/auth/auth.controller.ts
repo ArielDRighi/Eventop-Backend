@@ -10,6 +10,8 @@ import {
   Req,
   Get,
   Res,
+  Put,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signIn.dto';
@@ -26,6 +28,7 @@ import {
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { Public } from '@app/decorators/public.decorator';
 import { User } from '@app/users/entities/users.entity';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -91,5 +94,19 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.signInOauth(req.user);
     res.redirect(`http://localhost:3000?token=${response.accessToken}`);
+  }
+
+  // Ruta para modificar contrasena del usuario
+  @Put(':id/change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @Body() passwords: ChangePasswordDto,
+    @Param('id') userId: number,
+  ) {
+    try {
+      return await this.authService.changePassword(passwords, userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
   }
 }

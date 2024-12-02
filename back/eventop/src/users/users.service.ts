@@ -232,4 +232,23 @@ export class UserService {
       );
     }
   }
+
+  async updatePassword(userId: number, hashedPassword: any) {
+    try {
+      const user = await this.userRepository.findOne({ where: { userId } });
+      if (!user) {
+        throw new HttpException(
+          `Usuario con ID ${userId} inexistente`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      await this.userRepository.update(userId, { password: hashedPassword });
+      return { message: 'Contraseña actualizada exitosamente' };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al actualizar la contraseña',
+        error,
+      );
+    }
+  }
 }

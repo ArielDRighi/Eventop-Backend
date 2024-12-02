@@ -8,6 +8,7 @@ import { sendWelcomeEmail } from '@app/config/nodeMailer';
 import { MailService } from '@app/mail/mail.service';
 import { Role } from './enum/roles.enum';
 import { User } from '@app/users/entities/users.entity';
+import { ChangePasswordDto } from './dto/changePassword.dto';
 
 @Injectable()
 export class AuthService {
@@ -101,5 +102,22 @@ export class AuthService {
     const user = await this.userService.findOneByEmail(googleUser.email);
     if (user) return user;
     return await this.userService.createUser(googleUser);
+  }
+
+  async changePassword(passwords: ChangePasswordDto, userId: number) {
+    const user = await this.userService.findOneUser(userId);
+    if (!user) {
+      throw new BadRequestException(`User with id ${userId} not found`);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      passwords.oldPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Contraseña invalida');
+    }
+    const hashedPassword = await bcrypt.hash(passwords.newPassword, 10);
+    return await this.userService.updatePassword(user.userId, hashedPassword);
   }
 }
