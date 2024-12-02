@@ -93,7 +93,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.signInOauth(req.user);
-    res.redirect(`http://localhost:3000?token=${response.accessToken}`);
+    res.redirect(`http://localhost:3000/login?token=${response.accessToken}`);
   }
 
   // Ruta para modificar contrasena del usuario

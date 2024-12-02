@@ -40,6 +40,7 @@ export class MonitorInventarioGateway
 
     // Método para transmitir cambios de inventario
     broadcastInventoryUpdate(eventId: number, quantityAvailable: number) {
+      console.log(`Emitiendo actualización de inventario: eventId=${eventId}, quantityAvailable=${quantityAvailable}`);
       this.server.emit('inventoryUpdate', { eventId, quantityAvailable });
     }
   }
