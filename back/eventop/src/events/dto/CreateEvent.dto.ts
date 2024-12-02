@@ -1,7 +1,13 @@
 import { User } from '@app/users/entities/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsString, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import {
+  IsDate,
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -79,6 +85,15 @@ export class CreateEventDto {
 
   @ApiProperty({
     type: Number,
+    description: 'The total of tickets available',
+    required: true,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  quantityTotal: number;
+
+  @ApiProperty({
+    type: Number,
     description: 'The quantity of tickets available',
     required: true,
   })
@@ -86,4 +101,3 @@ export class CreateEventDto {
   @IsNotEmpty()
   quantityAvailable: number;
 }
-
