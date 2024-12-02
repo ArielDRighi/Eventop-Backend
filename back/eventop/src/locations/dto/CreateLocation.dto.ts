@@ -44,7 +44,7 @@ export class CreateLocationDto {
     required: true,
   })
   @IsNumber()
-  @IsNotEmpty()
+  @IsString()
   latitude: number;
 
   @ApiProperty({
@@ -53,6 +53,6 @@ export class CreateLocationDto {
     required: true,
   })
   @IsNumber()
-  @IsNotEmpty()
+  @IsString()
   longitude: number;
 }

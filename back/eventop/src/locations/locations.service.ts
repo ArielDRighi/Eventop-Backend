@@ -33,10 +33,10 @@ export class LocationService {
     return location;
   }
 
-  async createLocation(
-    createLocationDto: CreateLocationDto,
-  ): Promise<Location> {
-    const newLocation = this.locationRepository.create(createLocationDto);
+  async createLocation(createLocationDtoWithNumbers: CreateLocationDto) {
+    const newLocation = this.locationRepository.create(
+      createLocationDtoWithNumbers,
+    );
     try {
       return await this.locationRepository.save(newLocation);
     } catch (error) {
