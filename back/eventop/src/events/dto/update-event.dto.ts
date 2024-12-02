@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsString, IsDate, IsNumber, IsOptional, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 
 export class UpdateEventDto {
   @ApiProperty({
@@ -65,14 +71,15 @@ export class UpdateEventDto {
   })
   @IsNumber()
   @IsOptional()
-  quantityAvailable?: number;
+  quantityTotal?: number;
 
   @ApiProperty({
-    default: false,  
+    default: false,
   })
   @IsBoolean()
-  @Transform(({ value }) => (value === undefined ? false : value), { toClassOnly: true })
+  @Transform(({ value }) => (value === undefined ? false : value), {
+    toClassOnly: true,
+  })
   @IsOptional()
   approved?: boolean;
 }
-

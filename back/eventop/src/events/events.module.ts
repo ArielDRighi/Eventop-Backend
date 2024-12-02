@@ -8,10 +8,11 @@ import { CloudinaryService } from './cloudinary.service';
 import { Category } from 'src/categories/entities/categories.entity';
 import { Location } from 'src/locations/entities/locations.entity';
 import { User } from 'src/users/entities/users.entity';
+import { MonitorInventarioGateway } from '@app/gateways/monitor-inventario/monitor-inventario.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Event, Location, Category, User])],
   controllers: [EventController],
-  providers: [EventService, CloudinaryService],
+  providers: [EventService, CloudinaryService, MonitorInventarioGateway],
 })
 export class EventsModule {}
