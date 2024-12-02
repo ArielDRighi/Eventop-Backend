@@ -15,7 +15,7 @@ import { getDistance } from 'geolib';
 import { Role } from '@app/auth/enum/roles.enum';
 import { User } from '@app/users/entities/users.entity';
 import { notifyAdminsAboutEvent } from '@app/config/nodeMailer';
-import {sendApprovalEmail} from '@app/config/nodeMailer';
+import { sendApprovalEmail } from '@app/config/nodeMailer';
 
 @Injectable()
 export class EventService {
@@ -32,7 +32,7 @@ export class EventService {
 
   async getEvents(): Promise<Event[]> {
     const events = await this.eventRepository.find({
-      relations: { location_id: true, category_id: true , user: true },
+      relations: { location_id: true, category_id: true, user: true },
     });
     if (!events.length) {
       throw new NotFoundException('No events found');
@@ -60,23 +60,26 @@ export class EventService {
     });
     return admins.map((admin) => admin.email);
   }
-  
-  async createEvent(createEventDto: CreateEventDto, userId: number): Promise<Event> {
+
+  async createEvent(
+    createEventDto: CreateEventDto,
+    userId: number,
+  ): Promise<Event> {
     const user = await this.userRepository.findOne({
       where: { userId },
     });
     console.log(user);
-  
+
     if (!user) {
       throw new Error(`Usuario con ID ${userId} no encontrado`);
     }
-  
+
     if (user.role !== Role.Client && user.role !== Role.Admin) {
       throw new Error(
         'Solo los usuarios con rol de "client" o "admin" pueden crear eventos.',
       );
     }
-  
+
     const {
       name,
       description,
@@ -88,21 +91,21 @@ export class EventService {
       category_id,
       quantityAvailable,
     } = createEventDto;
-  
+
     const location = await this.locationRepository.findOne({
       where: { locationId: location_id },
     });
     if (!location) {
       throw new Error(`Locación con ID ${location_id} no encontrada`);
     }
-  
+
     const category = await this.categoryRepository.findOne({
       where: { categoryId: category_id },
     });
     if (!category) {
       throw new Error(`Categoría con ID ${category_id} no encontrada`);
     }
-  
+
     const newEvent = this.eventRepository.create({
       name,
       description,
@@ -116,47 +119,52 @@ export class EventService {
       user, // Aquí pasamos el objeto del usuario encontrado
       approved: false,
     });
-  
+
     const savedEvent = await this.eventRepository.save(newEvent);
-  
+
     // Incluimos las relaciones en la consulta final
     const eventWithRelations = await this.eventRepository.findOne({
       where: { eventId: savedEvent.eventId },
       relations: ['location_id', 'category_id', 'user'],
     });
-  
+
     // Obtener correos de los administradores
     const adminsEmails = await this.getAdminEmails();
-  
+
     if (adminsEmails.length > 0) {
-      console.log('Correos de administradores a los que se enviará la notificación:', adminsEmails);
+      console.log(
+        'Correos de administradores a los que se enviará la notificación:',
+        adminsEmails,
+      );
       await notifyAdminsAboutEvent(
         adminsEmails,
         user.name, // Nombre del cliente que creó el evento
         newEvent.name, // Nombre del evento creado
       );
-      console.log(`Notificaciones enviadas a los administradores para el evento "${newEvent.name}".`);
+      console.log(
+        `Notificaciones enviadas a los administradores para el evento "${newEvent.name}".`,
+      );
     } else {
-      console.log('No se encontraron administradores para enviar notificaciones.');
+      console.log(
+        'No se encontraron administradores para enviar notificaciones.',
+      );
     }
-  
+
     return eventWithRelations;
   }
-  
-  
 
   async updateEvent(
     eventId: number,
     updateEventDto: UpdateEventDto,
-    user: User,  // Usuario autenticado
+    user: User, // Usuario autenticado
   ): Promise<Event> {
     // Buscar el evento por su ID
-    const event = await this.eventRepository.findOne({ 
-      where: { eventId }, 
-      relations: ['user']  // Relación con el usuario creador
+    const event = await this.eventRepository.findOne({
+      where: { eventId },
+      relations: ['user'], // Relación con el usuario creador
     });
     console.log('Evento encontrado:', event);
-  
+
     // Si el evento no existe, lanzamos una excepción
     if (!event) {
       throw new HttpException(
@@ -164,107 +172,138 @@ export class EventService {
         HttpStatus.NOT_FOUND,
       );
     }
-  
-    
+
+    // Verificar que el usuario del evento no sea null
+    if (!event.user) {
+      throw new HttpException(
+        'El evento no tiene un usuario asociado',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     if (user.role === Role.Admin || user.role === Role.Client) {
       const updatedEvent = {
         ...updateEventDto,
-        approved:false}
+        approved: false,
+      };
 
       Object.assign(event, updatedEvent);
-      console.log("nombre",event.user.name);
+      console.log('nombre', event.user.name);
 
-      try {     
+      try {
         const adminsEmails = await this.getAdminEmails();
-  
-    if (adminsEmails.length > 0) {
-      console.log('Correos de administradores a los que se enviará la notificación:', adminsEmails);
-      await notifyAdminsAboutEvent(
-        adminsEmails,
-        event.user.name, // Nombre del cliente que creó el evento
-        event.name, // Nombre del evento creado
-      );
-      console.log(`Notificaciones enviadas a los administradores para el evento "${event.name}".`);
-    } else {
-      console.log('No se encontraron administradores para enviar notificaciones.');
-    }
+
+        if (adminsEmails.length > 0) {
+          console.log(
+            'Correos de administradores a los que se enviará la notificación:',
+            adminsEmails,
+          );
+          await notifyAdminsAboutEvent(
+            adminsEmails,
+            event.user.name, // Nombre del cliente que creó el evento
+            event.name, // Nombre del evento creado
+          );
+          console.log(
+            `Notificaciones enviadas a los administradores para el evento "${event.name}".`,
+          );
+        } else {
+          console.log(
+            'No se encontraron administradores para enviar notificaciones.',
+          );
+        }
         return await this.eventRepository.save(event);
       } catch (error) {
-        throw new HttpException('falla en la actualizacion', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'Falla en la actualización',
+          HttpStatus.BAD_REQUEST,
+        );
       }
     }
-  
+
     if (event.user.userId !== user.userId) {
-      throw new HttpException('No tienes permisos para actualizar este evento', HttpStatus.FORBIDDEN);
-    }}
-    
-
-  
-
-    async approveEvent(eventId: number, user: User): Promise<Event> {
-      if (user.role !== Role.Admin) {
-        throw new HttpException('Solo los admins pueden aprobar eventos', HttpStatus.FORBIDDEN);
-      }
-      console.log(user.role);
-      
-    
-      const event = await this.eventRepository.findOne({
-        where: { eventId },
-        relations: ['user'], // Incluye la relación con el creador del evento
-      });
-      console.log('Evento encontrado:', event);
-      
-    
-      if (!event) {
-        throw new HttpException('Evento no encontrado', HttpStatus.NOT_FOUND);
-      }
-    
-      event.approved = true;
-    
-      try {
-        const approvedEvent = await this.eventRepository.save(event);
-        console.log(event.user.email, event.user);
-        
-        // Enviar correo al cliente que creó el evento
-        if (event.user && event.user.email) {
-          const email = event.user.email;
-          const name = event.user.name;
-          const eventName = event.name;
-    
-          console.log(`Enviando correo a ${email} para notificar la aprobación del evento "${eventName}".`);
-    
-          await sendApprovalEmail(email, name, eventName);
-          console.log(`Correo de aprobación enviado a ${email}.`);
-        } else {
-          console.log('El evento no tiene un usuario asociado con un email válido.');
-        }
-    
-        return approvedEvent;
-      } catch (error) {
-        throw new HttpException('Fallo en la aprobacion del evento', HttpStatus.BAD_REQUEST);
-      }
+      throw new HttpException(
+        'No tienes permisos para actualizar este evento',
+        HttpStatus.FORBIDDEN,
+      );
     }
-  
-  
+  }
+
+  async approveEvent(eventId: number, user: User): Promise<Event> {
+    if (user.role !== Role.Admin) {
+      throw new HttpException(
+        'Solo los admins pueden aprobar eventos',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    console.log(user.role);
+
+    const event = await this.eventRepository.findOne({
+      where: { eventId },
+      relations: ['user'], // Incluye la relación con el creador del evento
+    });
+    console.log('Evento encontrado:', event);
+
+    if (!event) {
+      throw new HttpException('Evento no encontrado', HttpStatus.NOT_FOUND);
+    }
+
+    event.approved = true;
+
+    try {
+      const approvedEvent = await this.eventRepository.save(event);
+      console.log(event.user.email, event.user);
+
+      // Enviar correo al cliente que creó el evento
+      if (event.user && event.user.email) {
+        const email = event.user.email;
+        const name = event.user.name;
+        const eventName = event.name;
+
+        console.log(
+          `Enviando correo a ${email} para notificar la aprobación del evento "${eventName}".`,
+        );
+
+        await sendApprovalEmail(email, name, eventName);
+        console.log(`Correo de aprobación enviado a ${email}.`);
+      } else {
+        console.log(
+          'El evento no tiene un usuario asociado con un email válido.',
+        );
+      }
+
+      return approvedEvent;
+    } catch (error) {
+      throw new HttpException(
+        'Fallo en la aprobacion del evento',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
 
   async deleteEvent(
     eventId: number,
-    user: User,  // Asegúrate de pasar el usuario autenticado
+    user: User, // Asegúrate de pasar el usuario autenticado
   ): Promise<{ message: string }> {
-    const event = await this.eventRepository.findOne({ where: { eventId }, relations: ['user'] });
-  
+    const event = await this.eventRepository.findOne({
+      where: { eventId },
+      relations: ['user'],
+    });
+
     if (!event) {
       throw new HttpException(
         `Evento con ID ${eventId} no encontrado`,
         HttpStatus.NOT_FOUND,
       );
     }
-  
+
     // Verificar si el usuario autenticado es el creador del evento
     if (event.user.userId !== user.userId) {
-      throw new HttpException('No tienes permisos para eliminar este evento', HttpStatus.FORBIDDEN);
+      throw new HttpException(
+        'No tienes permisos para eliminar este evento',
+        HttpStatus.FORBIDDEN,
+      );
     }
-  
+
     try {
       // Eliminar el evento
       await this.eventRepository.remove(event);
