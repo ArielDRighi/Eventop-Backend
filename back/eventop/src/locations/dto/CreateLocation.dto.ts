@@ -43,7 +43,6 @@ export class CreateLocationDto {
     description: 'The latitude of the location',
     required: true,
   })
-  @IsNumber()
   @IsString()
   latitude: number;
 
@@ -52,7 +51,6 @@ export class CreateLocationDto {
     description: 'The longitude of the location',
     required: true,
   })
-  @IsNumber()
   @IsString()
   longitude: number;
 }
