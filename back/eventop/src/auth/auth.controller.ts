@@ -12,6 +12,7 @@ import {
   Res,
   Put,
   Param,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signIn.dto';
@@ -109,6 +110,17 @@ export class AuthController {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }
+  @Put('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Query('email') email: string) {
+    try {
+      console.log(email);
+
+      return await this.authService.forgotPassword(email);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
 
   @Put(':id/assign-password')
   @HttpCode(HttpStatus.OK)
@@ -118,19 +130,6 @@ export class AuthController {
   ) {
     try {
       return await this.authService.assignPassword(passwords, userId);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
-    }
-  }
-
-  // Ruta para recuperar contrasena olvidadada
-  @Put('forgot-password')
-  @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body() email: string) {
-    try {
-      console.log(email);
-
-      return await this.authService.forgotPassword(email);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }

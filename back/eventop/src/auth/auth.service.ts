@@ -142,7 +142,7 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('Usuario no encontrado');
     }
-    const newPassword = Math.random().toString(36).slice(-8);
+    const newPassword = require('crypto').randomBytes(4).toString('hex');
     console.log('Nueva contraseña generada:', newPassword);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await this.userService.updatePassword(user.userId, hashedPassword);

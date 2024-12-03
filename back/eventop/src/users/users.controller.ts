@@ -16,6 +16,7 @@ import {
   BadRequestException,
   Query,
   Delete,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -30,6 +31,7 @@ import {
   ApiParam,
   ApiBody,
   ApiResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -44,6 +46,15 @@ export class UserController {
     private readonly userService: UserService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  @Roles(Role.Admin, Role.User, Role.Client)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Get('email')
+  @ApiQuery({ name: 'email', type: String, required: true })
+  async findOneByEmail(@Query('email') email: string) {
+    const result = await this.userService.findOneByEmail(email);
+    return result;
+  }
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
@@ -199,15 +210,5 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad request.' })
   async deleteUser(@Param('id') userId: number) {
     return await this.userService.deleteUser(userId);
-  }
-
-  @Roles(Role.Admin, Role.User, Role.Client)
-  @UseGuards(AuthGuard('jwt'), RoleGuard)
-  @Get('email')
-  async findOneByEmail(@Query('email') email: string) {
-    console.log(`Finding user with email: ${email}`);
-    const result = await this.userService.findOneByEmail(email);
-    console.log(`Result: ${JSON.stringify(result)}`);
-    return result;
   }
 }

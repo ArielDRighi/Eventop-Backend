@@ -14,7 +14,7 @@ const config = {
   database: process.env.POSTGRES_DB,
   synchronize: true,
   autoLoadEntities: true,
-  logging: true,
+  logging: false,
   dropSchema: false,
   // ssl: {
   //   rejectUnauthorized: false,

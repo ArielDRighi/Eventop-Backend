@@ -45,6 +45,7 @@ export class MailService {
     return this.mailerService.sendMail({
       to: email,
       subject,
+      text,
     });
   }
 }
