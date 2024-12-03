@@ -14,11 +14,11 @@ const config = {
   database: process.env.POSTGRES_DB,
   synchronize: true,
   autoLoadEntities: true,
-  logging: false,
+  logging: true,
   dropSchema: false,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  // ssl: {
+  //   rejectUnauthorized: false,
+  // },
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   subscribers: [],

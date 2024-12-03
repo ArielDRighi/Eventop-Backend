@@ -37,4 +37,14 @@ export class MailService {
       text,
     });
   }
+
+  sendForgotPasswordEmail(email: string, newPassword: string) {
+    const subject = 'Recuperación de contraseña';
+    const text = `Tu nueva contraseña es: ${newPassword}. Recuerda cambiarla en tu perfil.`;
+
+    return this.mailerService.sendMail({
+      to: email,
+      subject,
+    });
+  }
 }

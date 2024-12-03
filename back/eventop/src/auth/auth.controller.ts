@@ -122,4 +122,17 @@ export class AuthController {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
   }
+
+  // Ruta para recuperar contrasena olvidadada
+  @Put('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() email: string) {
+    try {
+      console.log(email);
+
+      return await this.authService.forgotPassword(email);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
 }

@@ -200,4 +200,14 @@ export class UserController {
   async deleteUser(@Param('id') userId: number) {
     return await this.userService.deleteUser(userId);
   }
+
+  @Roles(Role.Admin, Role.User, Role.Client)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Get('email')
+  async findOneByEmail(@Query('email') email: string) {
+    console.log(`Finding user with email: ${email}`);
+    const result = await this.userService.findOneByEmail(email);
+    console.log(`Result: ${JSON.stringify(result)}`);
+    return result;
+  }
 }

@@ -134,4 +134,23 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
     return await this.userService.updatePassword(user.userId, hashedPassword);
   }
+
+  async forgotPassword(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+    console.log(user);
+
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+    const newPassword = Math.random().toString(36).slice(-8);
+    console.log('Nueva contraseña generada:', newPassword);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.userService.updatePassword(user.userId, hashedPassword);
+    try {
+      await this.mailService.sendForgotPasswordEmail(email, newPassword);
+    } catch (error) {
+      throw new BadRequestException('Error al enviar el correo');
+    }
+    return { message: 'Correo enviado' };
+  }
 }
