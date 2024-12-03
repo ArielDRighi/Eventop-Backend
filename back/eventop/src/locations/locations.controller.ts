@@ -50,7 +50,18 @@ export class LocationController {
   @HttpCode(HttpStatus.CREATED)
   async createLocation(@Body() createLocationDto: CreateLocationDto) {
     try {
-      return await this.locationService.createLocation(createLocationDto);
+      const { longitude, latitude } = createLocationDto;
+      const latitudeNumber = Number(latitude);
+      const longitudeNumber = Number(longitude);
+      const createLocationDtoWithNumbers = {
+        ...createLocationDto,
+        latitude: latitudeNumber,
+        longitude: longitudeNumber,
+      };
+
+      return await this.locationService.createLocation(
+        createLocationDtoWithNumbers,
+      );
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
