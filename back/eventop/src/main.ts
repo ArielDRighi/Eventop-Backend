@@ -10,7 +10,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const corsOptions: CorsOptions = {
-    origin: ['https://tu-app.vercel.app'], // URL de Vercel
+    origin: ['https://eventop-frontend.vercel.app'], // URL de Vercel
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true, // Permitir cookies si las usas
   };
