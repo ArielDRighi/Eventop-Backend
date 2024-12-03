@@ -18,6 +18,29 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
   ) {}
+  generatePassword(): string {
+    const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+    const upperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const specialChars = '!@#$%^&*()_+[]{}|;:,.<>?';
+
+    const allChars = lowerCase + upperCase + numbers + specialChars;
+
+    let password = '';
+    password += lowerCase[Math.floor(Math.random() * lowerCase.length)];
+    password += upperCase[Math.floor(Math.random() * upperCase.length)];
+    password += numbers[Math.floor(Math.random() * numbers.length)];
+    password += specialChars[Math.floor(Math.random() * specialChars.length)];
+
+    for (let i = 4; i < 12; i++) {
+      password += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+
+    return password
+      .split('')
+      .sort(() => 0.5 - Math.random())
+      .join('');
+  }
 
   async signIn(credential: SignInAuthDto) {
     const dbUser = await this.userService.findOneByEmail(credential.email);
@@ -142,8 +165,9 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('Usuario no encontrado');
     }
-    const newPassword = require('crypto').randomBytes(4).toString('hex');
-    console.log('Nueva contraseña generada:', newPassword);
+    const newPassword = this.generatePassword();
+    console.log(newPassword);
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await this.userService.updatePassword(user.userId, hashedPassword);
     try {
