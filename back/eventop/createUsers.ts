@@ -3,11 +3,56 @@ import { User } from '@app/users/entities/users.entity';
 import { connectionSource } from '@app/config/typeorm';
 
 const users = [
-  { name: 'User1', email: 'user1@example.com', password: 'Password1!' },
-  { name: 'User2', email: 'user2@example.com', password: 'Password2!' },
-  { name: 'User3', email: 'user3@example.com', password: 'Password3!' },
-  { name: 'User4', email: 'user4@example.com', password: 'Password4!' },
-  { name: 'User5', email: 'user5@example.com', password: 'Password5!' },
+  {
+    name: 'Juan Perez',
+    email: 'juan.perez@example.com',
+    password: 'Password1!',
+  },
+  {
+    name: 'Maria Gomez',
+    email: 'maria.gomez@example.com',
+    password: 'Password2!',
+  },
+  {
+    name: 'Carlos Lopez',
+    email: 'carlos.lopez@example.com',
+    password: 'Password3!',
+  },
+  {
+    name: 'Ana Martinez',
+    email: 'ana.martinez@example.com',
+    password: 'Password4!',
+  },
+  {
+    name: 'Luis Fernandez',
+    email: 'luis.fernandez@example.com',
+    password: 'Password5!',
+  },
+  {
+    name: 'Laura Sanchez',
+    email: 'laura.sanchez@example.com',
+    password: 'Password6!',
+  },
+  {
+    name: 'Pedro Ramirez',
+    email: 'pedro.ramirez@example.com',
+    password: 'Password7!',
+  },
+  {
+    name: 'Sofia Torres',
+    email: 'sofia.torres@example.com',
+    password: 'Password8!',
+  },
+  {
+    name: 'Diego Alvarez',
+    email: 'diego.alvarez@example.com',
+    password: 'Password9!',
+  },
+  {
+    name: 'Marta Diaz',
+    email: 'marta.diaz@example.com',
+    password: 'Password10!',
+  },
 ];
 
 async function createUsers() {
