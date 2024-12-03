@@ -12,6 +12,7 @@ import {
   Res,
   Put,
   Param,
+  Query,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInAuthDto } from './dto/signIn.dto';
@@ -105,6 +106,17 @@ export class AuthController {
   ) {
     try {
       return await this.authService.changePassword(passwords, userId);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+    }
+  }
+  @Put('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Query('email') email: string) {
+    try {
+      console.log(email);
+
+      return await this.authService.forgotPassword(email);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
     }
