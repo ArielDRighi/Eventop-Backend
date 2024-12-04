@@ -15,7 +15,7 @@ async function bootstrap() {
       'https://eventop-frontend-6zhm7o77f-ariel-righis-projects.vercel.app',
       'http://localhost:3000/',
     ],
-    methods: ['GET', 'POST', 'PUT', 'FETCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   };
 
