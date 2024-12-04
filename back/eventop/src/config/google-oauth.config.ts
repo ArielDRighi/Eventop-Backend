@@ -3,5 +3,5 @@ import { registerAs } from '@nestjs/config';
 export default registerAs('googleOAuth', () => ({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: 'https://eventop-backend.onrender.com',
+  callbackURL: 'https://eventop-backend.onrender.com/auth/google/callback',
 }));
