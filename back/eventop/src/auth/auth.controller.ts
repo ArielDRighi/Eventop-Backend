@@ -96,7 +96,7 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.signInOauth(req.user);
     res.redirect(
-      `https://eventop-backend.onrender.com/login?token=${response.accessToken}`,
+      `https://eventop-frontend.vercel.app/login?token=${response.accessToken}`,
     );
   }
 
