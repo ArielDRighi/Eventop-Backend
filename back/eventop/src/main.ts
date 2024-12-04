@@ -11,7 +11,7 @@ async function bootstrap() {
 
   const corsOptions: CorsOptions = {
     origin: ['https://eventop-frontend.vercel.app'], // URL de Vercel
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'FETCH', 'DELETE'],
     credentials: true, // Permitir cookies si las usas
   };
 
