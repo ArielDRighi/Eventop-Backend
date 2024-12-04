@@ -172,7 +172,7 @@ export class EventController {
     }
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Put(':id/image')
   @HttpCode(HttpStatus.OK)
