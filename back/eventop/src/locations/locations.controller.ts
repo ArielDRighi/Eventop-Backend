@@ -44,7 +44,7 @@ export class LocationController {
     }
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
