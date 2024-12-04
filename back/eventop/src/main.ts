@@ -9,13 +9,17 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
 
-  const corsOptions: CorsOptions = {
-    origin: ['https://eventop-frontend.vercel.app', 'http://localhost:3000'], // URL de Vercel
-    methods: ['GET', 'POST', 'PUT', 'FETCH', 'DELETE'],
-    credentials: true, // Permitir cookies si las usas
-  };
+  // const corsOptions: CorsOptions = {
+  //   origin: [
+  //     'https://eventop-frontend.vercel.app', // URL de producción
+  //     'https://eventop-frontend-6zhm7o77f-ariel-righis-projects.vercel.app',
+  //     'http://localhost:3000/',
+  //   ],
+  //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  //   credentials: true,
+  // };
 
-  app.enableCors(corsOptions);
+  app.enableCors();
 
   const config = new DocumentBuilder()
     .setTitle('Eventop')
