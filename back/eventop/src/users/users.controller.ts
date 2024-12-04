@@ -58,6 +58,13 @@ export class UserController {
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Get('total-users')
+  async getTotalUsers() {
+    return await this.userService.getTotalUsers();
+  }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Get('profile')
   async getProfile(@Request() req) {
     try {

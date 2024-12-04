@@ -251,4 +251,12 @@ export class UserService {
       );
     }
   }
+
+  async getTotalUsers() {
+    const total = await this.userRepository.count();
+    if (!total) {
+      throw new NotFoundException('No users found');
+    }
+    return total;
+  }
 }
