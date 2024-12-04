@@ -95,7 +95,9 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.signInOauth(req.user);
-    res.redirect(`http://localhost:3001/login?token=${response.accessToken}`);
+    res.redirect(
+      `https://eventop-backend.onrender.com/login?token=${response.accessToken}`,
+    );
   }
 
   @Put(':id/change-password')
