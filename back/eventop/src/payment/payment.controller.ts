@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentDto } from './dto/Payment.dto';
 
@@ -11,5 +11,9 @@ export class PaymentController {
     return {
       preferenceId: await this.paymentService.createPreference(data),
     };
+  }
+  @Get('status/:id')
+  async getPaymentStatus(@Param('id') id: string) {
+    return await this.paymentService.getPaymentStatus(id);
   }
 }

@@ -5,7 +5,7 @@ import {
   Inject,
   BadRequestException,
 } from '@nestjs/common';
-import MercadoPagoConfig, { Preference } from 'mercadopago';
+import MercadoPagoConfig, { Payment, Preference } from 'mercadopago';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from '../events/entities/events.entity';
@@ -100,17 +100,27 @@ export class PaymentService {
       );
 
       // Verificar si la preferencia fue creada correctamente y si la transacción fue aprobada
-      if (response.auto_return === 'approved') {
-        // Solo enviar el correo si el pago fue aprobado
-        await sendPurchaseEmail(email, name, event.name);
-      } else {
-        console.log('El pago no fue aprobado, no se enviará el correo');
-      }
+      // if (response.auto_return === 'approved') {
+      //   // Solo enviar el correo si el pago fue aprobado
+      //   await sendPurchaseEmail(email, name, event.name);
+      // } else {
+      //   console.log('El pago no fue aprobado, no se enviará el correo');
+      // }
 
       return response.id;
     } catch (error) {
       console.log('Error', error);
       throw error;
+    }
+  }
+  async getPaymentStatus(paymentId: string) {
+    const payment = new Payment(client);
+    try {
+      const response = await payment.get({ id: paymentId });
+      return response;
+    } catch (error) {
+      console.error('Error fetching payment status:', error);
+      throw new BadRequestException('Error fetching payment status');
     }
   }
 
