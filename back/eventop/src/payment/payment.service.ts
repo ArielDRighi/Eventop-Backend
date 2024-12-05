@@ -15,6 +15,7 @@ import { UserService } from '@app/users/users.service';
 import { PaymentDto } from './dto/Payment.dto';
 import { config as dotenvConfig } from 'dotenv';
 import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway';
+import { Client } from 'socket.io/dist/client';
 
 dotenvConfig({ path: '.env' });
 
@@ -24,6 +25,7 @@ const client = new MercadoPagoConfig({
 
 @Injectable()
 export class PaymentService {
+  
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
@@ -74,58 +76,100 @@ export class PaymentService {
               quantity: Number(quantity),
               unit_price: unitPrice,
               id: event.eventId.toString(),
+              picture_url: event.imageUrl,
+              category_id: 'tickets',
             },
+
           ],
+          marketplace_fee: 0,
           payer: {
+            name: user.name,
             email: user.email,
           },
           back_urls: {
-            success: 'https://www.tu-sitio.com/success',
-            failure: 'https://www.tu-sitio.com/failure',
+            success: `http://localhost:3001/payment/success/${event.eventId}`,
+            failure: `http://localhost:3001/payment/failure/${event.eventId}`,
             pending: 'https://www.tu-sitio.com/pending',
           },
-          auto_return: 'approved',
+          notification_url: 'https://eventop-backend.onrender.com/notifications?source_news=webhooks',
+          expires:false,
+          auto_return: 'all',
+          binary_mode:true,
+          statement_descriptor: 'Eventop',
         },
       });
+      
 
-      // Obtener la cantidad actualizada de entradas disponibles
-      const updatedInventoryCount = await this.getUpdatedInventoryCount(
-        Number(eventId),
-      );
+      
 
-      // Transmitir la actualización de inventario
-      this.monitorInventarioGateway.broadcastInventoryUpdate(
-        Number(eventId),
-        updatedInventoryCount,
-      );
-
-      // Verificar si la preferencia fue creada correctamente y si la transacción fue aprobada
-      // if (response.auto_return === 'approved') {
-      //   // Solo enviar el correo si el pago fue aprobado
-      //   await sendPurchaseEmail(email, name, event.name);
-      // } else {
-      //   console.log('El pago no fue aprobado, no se enviará el correo');
-      // }
-
+      console.log(response.id);
+      
       return response.id;
+    
+
+      
     } catch (error) {
       console.log('Error', error);
       throw error;
     }
   }
+  
   async getPaymentStatus(paymentId: string) {
-    const payment = new Payment(client);
-    try {
-      const response = await payment.get({ id: paymentId });
-      return response;
-    } catch (error) {
-      console.error('Error fetching payment status:', error);
-      throw new BadRequestException('Error fetching payment status');
+    const preference = new Preference(client);
+    const response = await preference.get({preferenceId: paymentId});
+    return response;
+  }
+
+  async handlePaymentSuccess(collectionStatus: boolean, paymentId: string, status: boolean,id:number, preference_id: string) {
+    const preference = new Preference(client);
+    const response = await preference.get({preferenceId: preference_id});
+    console.log(response);
+
+
+    const event = await this.eventRepository.findOne({where: {eventId: id}});
+    if(!event){
+      throw new NotFoundException('Event not found');
     }
+    const eventId = id;
+    if(collectionStatus == false ){
+      console.log('El no pago fue aprobado');
+      throw new BadRequestException('Payment was not approved');
+    }
+    if(status == false) {
+      console.log('El no pago fue aprobado');
+      throw new BadRequestException('Payment was not approved');
+    }
+    if(!paymentId){
+      throw new BadRequestException('Payment ID is required');
+    }
+    // Obtener la cantidad actualizada de entradas disponibles
+    const updatedInventoryCount = await this.getUpdatedInventoryCount(
+      Number(eventId),
+    );
+
+    // Transmitir la actualización de inventario
+    this.monitorInventarioGateway.broadcastInventoryUpdate(
+      Number(eventId),
+      updatedInventoryCount,
+    );
+
+      const email = response.payer.email;
+      const name = response.payer.name;
+    
+      console.log(email,name);
+
+      await sendPurchaseEmail(email,name, event.name);
+
+    return ({message:" El pago fue aprobado con exito"})
+    
   }
 
   private async getUpdatedInventoryCount(eventId: number): Promise<number> {
     const event = await this.eventService.getEventById(eventId);
     return event.quantityAvailable; // Suponiendo que el evento tiene una propiedad quantityAvailable
   }
+
+
+
+
 }

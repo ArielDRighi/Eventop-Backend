@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import { addSignature } from '../mail/emailHelper';
-
+import QRCode from 'qrcode'
 dotenv.config({
   path: '.env',
 });
@@ -78,10 +78,13 @@ export const sendPurchaseEmail = async (
   event: string,
 ) => {
   const asunto = 'Gracias por tu compra';
+  const qrData = `Evento: ${event}\nComprador: ${name}\nFecha: ${new Date().toLocaleString()}`;
+  const qrCodeUrl = await QRCode.toDataURL(qrData);
   const htmlContent = addSignature(`
     <h1>¡Gracias por tu compra, ${name}!</h1>
     <p>Estamos encantados de que hayas adquirido el evento: <strong>${event}</strong>.</p>
     <p>Esperamos que disfrutes del evento.</p>
+    <p><img src="${qrCodeUrl}" alt="QR Code"></p>
   `);
 
   const mailOptions = {
