@@ -113,10 +113,4 @@ export class PaymentService {
     const event = await this.eventService.getEventById(eventId);
     return event.quantityAvailable;
   }
-
-  async processMercadoPagoNotification(notification: any) {
-    // Lógica para procesar la notificación
-    console.log('Processing notification:', notification);
-    // Actualiza el estado del pago, inventario, etc.
-  }
 }
