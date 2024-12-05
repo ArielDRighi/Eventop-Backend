@@ -20,7 +20,6 @@ export class RoleGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // Si no hay roles requeridos, se permite el acceso
     if (!requiredRoles) {
       return true;
     }
@@ -29,24 +28,21 @@ export class RoleGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      throw new ForbiddenException('No tienes permiso para acceder');
+      throw new ForbiddenException('You do not have permission to access');
     }
 
-    // Obtenemos los roles del usuario
     const userRoles = user.role;
 
-    // Verificamos si el usuario tiene roles asignados
     if (!userRoles) {
-      throw new ForbiddenException('No tienes permitido acceder');
+      throw new ForbiddenException('You are not allowed to access');
     }
 
-    // Aca vemos si el rol del usuario está incluido en los roles requeridos
     const hasRole = Array.isArray(userRoles)
       ? userRoles.some((role: Role) => requiredRoles.includes(role))
       : requiredRoles.includes(userRoles);
 
     if (!hasRole) {
-      throw new ForbiddenException('No tienes permitido acceder');
+      throw new ForbiddenException('You are not allowed to access');
     }
 
     return true;

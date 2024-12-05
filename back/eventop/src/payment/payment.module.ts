@@ -10,7 +10,7 @@ import { Event } from '@app/events/entities/events.entity';
 import { Category } from '@app/categories/entities/categories.entity';
 import { Comment } from '@app/users/entities/comments.entity';
 import { MailModule } from '@app/mail/mail.module';
-import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway'; // Importa el gateway
+import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway';
 import { UsersModule } from '@app/users/users.module';
 
 @Module({
@@ -25,7 +25,7 @@ import { UsersModule } from '@app/users/users.module';
     UserService,
     EventService,
     MonitorInventarioGateway,
-  ], // Añade el gateway a los proveedores
+  ],
   exports: [PaymentService],
 })
 export class PaymentModule {}

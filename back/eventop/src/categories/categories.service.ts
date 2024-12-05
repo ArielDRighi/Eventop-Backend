@@ -62,7 +62,7 @@ export class CategoryService {
 
     if (!category) {
       throw new HttpException(
-        `Categoría con ID ${categoryId} no encontrada`,
+        `Category with ID ${categoryId} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
@@ -89,7 +89,9 @@ export class CategoryService {
     }
     try {
       await this.categoryRepository.remove(category);
-      return { message: `Categoria con ID ${categoryId} eliminada con éxito!` };
+      return {
+        message: `Category with ID ${categoryId} successfully removed!`,
+      };
     } catch (error) {
       throw new HttpException(
         'Failed to delete category',

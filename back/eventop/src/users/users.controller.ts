@@ -123,23 +123,17 @@ export class UserController {
   ) {
     try {
       if (!file) {
-        throw new HttpException(
-          'No se proporcionó una imagen',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('No image provided', HttpStatus.BAD_REQUEST);
       }
 
-      // Sube la imagen a Cloudinary y obtiene la URL
       const imageUrl = await this.cloudinaryService.uploadImage(file);
 
-      // Crea un objeto parcial de tipo UpdateUserDto solo con imageUrl
       const updateData: UpdateUserDto = { imageUrl };
 
-      // Actualiza el usuario solo con la URL de la imagen
       const updatedUser = await this.userService.updateUser(userId, updateData);
       return { message: 'Imagen de perfil cargada correctamente', updatedUser };
     } catch (error) {
-      console.error('Error al subir la imagen y actualizar el usuario:', error);
+      console.error('Error uploading image and updating user:', error);
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
