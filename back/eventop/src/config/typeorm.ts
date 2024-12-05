@@ -16,9 +16,9 @@ const config = {
   autoLoadEntities: true,
   logging: false,
   dropSchema: false,
-  // ssl: {
-  //   rejectUnauthorized: false,
-  // },
+  ssl: {
+    rejectUnauthorized: false,
+  },
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   subscribers: [],

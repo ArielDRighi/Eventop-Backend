@@ -56,7 +56,7 @@ export class EventService {
   async getAdminEmails(): Promise<string[]> {
     const admins = await this.userRepository.find({
       where: { role: Role.Admin },
-      select: ['email'], // Solo necesitamos los correos
+      select: ['email'],
     });
     return admins.map((admin) => admin.email);
   }
@@ -84,6 +84,7 @@ export class EventService {
       name,
       description,
       date,
+      time,
       price,
       currency,
       location_id,
@@ -114,13 +115,14 @@ export class EventService {
       name,
       description,
       date,
+      time,
       price,
       currency,
       location_id: location,
       imageUrl,
       category_id: category,
       quantityAvailable,
-      user, // Aquí pasamos el objeto del usuario encontrado
+      user,
       approved: false,
     });
 
@@ -160,16 +162,14 @@ export class EventService {
   async updateEvent(
     eventId: number,
     updateEventDto: UpdateEventDto,
-    user: User, // Usuario autenticado
+    user: User,
   ): Promise<Event> {
-    // Buscar el evento por su ID
     const event = await this.eventRepository.findOne({
       where: { eventId },
-      relations: ['user'], // Relación con el usuario creador
+      relations: ['user'],
     });
     console.log('Evento encontrado:', event);
 
-    // Si el evento no existe, lanzamos una excepción
     if (!event) {
       throw new HttpException(
         `Evento con ID ${eventId} no encontrado`,
@@ -177,7 +177,6 @@ export class EventService {
       );
     }
 
-    // Verificar que el usuario del evento no sea null
     if (!event.user) {
       throw new HttpException(
         'El evento no tiene un usuario asociado',
@@ -204,8 +203,8 @@ export class EventService {
           );
           await notifyAdminsAboutEvent(
             adminsEmails,
-            event.user.name, // Nombre del cliente que creó el evento
-            event.name, // Nombre del evento creado
+            event.user.name,
+            event.name,
           );
           console.log(
             `Notificaciones enviadas a los administradores para el evento "${event.name}"`,
@@ -243,7 +242,7 @@ export class EventService {
 
     const event = await this.eventRepository.findOne({
       where: { eventId },
-      relations: ['user'], // Incluye la relación con el creador del evento
+      relations: ['user'],
     });
     console.log('Evento encontrado:', event);
 
