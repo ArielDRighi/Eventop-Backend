@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
-import { WebhookController } from './webhook.controller'; // Importa el nuevo controlador
 import { User } from '@app/users/entities/users.entity';
 import { UserService } from '@app/users/users.service';
 import { EventService } from '@app/events/events.service';
@@ -20,7 +19,7 @@ import { UsersModule } from '@app/users/users.module';
     MailModule,
     UsersModule,
   ],
-  controllers: [PaymentController, WebhookController], // Añade el nuevo controlador
+  controllers: [PaymentController],
   providers: [
     PaymentService,
     UserService,
