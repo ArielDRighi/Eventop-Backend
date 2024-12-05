@@ -71,12 +71,12 @@ export class EventService {
     console.log(user);
 
     if (!user) {
-      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
 
     if (user.role !== Role.Client && user.role !== Role.Admin) {
       throw new NotFoundException(
-        'Solo los usuarios con rol de "client" o "admin" pueden crear eventos.',
+        'Only users with the "client" or "admin" role can create events.',
       );
     }
 
@@ -97,18 +97,14 @@ export class EventService {
       where: { locationId: location_id },
     });
     if (!location) {
-      throw new NotFoundException(
-        `Locación con ID ${location_id} no encontrada`,
-      );
+      throw new NotFoundException(`Location with ID ${location_id} not found`);
     }
 
     const category = await this.categoryRepository.findOne({
       where: { categoryId: category_id },
     });
     if (!category) {
-      throw new NotFoundException(
-        `Categoría con ID ${category_id} no encontrada`,
-      );
+      throw new NotFoundException(`Category with ID ${category_id} not found`);
     }
 
     const newEvent = this.eventRepository.create({
@@ -128,32 +124,24 @@ export class EventService {
 
     const savedEvent = await this.eventRepository.save(newEvent);
 
-    // Incluimos las relaciones en la consulta final
     const eventWithRelations = await this.eventRepository.findOne({
       where: { eventId: savedEvent.eventId },
       relations: ['location_id', 'category_id', 'user'],
     });
 
-    // Obtener correos de los administradores
     const adminsEmails = await this.getAdminEmails();
 
     if (adminsEmails.length > 0) {
       console.log(
-        'Correos de administradores a los que se enviará la notificación:',
+        'Administrator emails to which the notification will be sent:',
         adminsEmails,
       );
-      await notifyAdminsAboutEvent(
-        adminsEmails,
-        user.name, // Nombre del cliente que creó el evento
-        newEvent.name, // Nombre del evento creado
-      );
+      await notifyAdminsAboutEvent(adminsEmails, user.name, newEvent.name);
       console.log(
-        `Notificaciones enviadas a los administradores para el evento "${newEvent.name}"`,
+        `Notifications sent to administrators for the event "${newEvent.name}"`,
       );
     } else {
-      console.log(
-        'No se encontraron administradores para enviar notificaciones.',
-      );
+      console.log('No administrators were found to send notifications.');
     }
 
     return eventWithRelations;
@@ -168,18 +156,18 @@ export class EventService {
       where: { eventId },
       relations: ['user'],
     });
-    console.log('Evento encontrado:', event);
+    console.log('Event Found:', event);
 
     if (!event) {
       throw new HttpException(
-        `Evento con ID ${eventId} no encontrado`,
+        `Event with ID ${eventId} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (!event.user) {
       throw new HttpException(
-        'El evento no tiene un usuario asociado',
+        'The event does not have an associated user',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -198,7 +186,7 @@ export class EventService {
 
         if (adminsEmails.length > 0) {
           console.log(
-            'Correos de administradores a los que se enviará la notificación:',
+            'Administrator emails to which the notification will be sent:',
             adminsEmails,
           );
           await notifyAdminsAboutEvent(
@@ -207,25 +195,20 @@ export class EventService {
             event.name,
           );
           console.log(
-            `Notificaciones enviadas a los administradores para el evento "${event.name}"`,
+            `Notifications sent to administrators for the event "${event.name}"`,
           );
         } else {
-          console.log(
-            'No se encontraron administradores para enviar notificaciones.',
-          );
+          console.log('No administrators were found to send notifications.');
         }
         return await this.eventRepository.save(event);
       } catch (error) {
-        throw new HttpException(
-          'Falla en la actualización',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('Update failed', HttpStatus.BAD_REQUEST);
       }
     }
 
     if (event.user.userId !== user.userId) {
       throw new HttpException(
-        'No tienes permisos para actualizar este evento',
+        'You do not have permission to update this event',
         HttpStatus.FORBIDDEN,
       );
     }
@@ -234,7 +217,7 @@ export class EventService {
   async approveEvent(eventId: number, user: User): Promise<Event> {
     if (user.role !== Role.Admin) {
       throw new HttpException(
-        'Solo los admins pueden aprobar eventos',
+        'Only admins can approve events',
         HttpStatus.FORBIDDEN,
       );
     }
@@ -244,10 +227,10 @@ export class EventService {
       where: { eventId },
       relations: ['user'],
     });
-    console.log('Evento encontrado:', event);
+    console.log('Event Found:', event);
 
     if (!event) {
-      throw new HttpException('Evento no encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
     }
 
     event.approved = true;
@@ -256,30 +239,26 @@ export class EventService {
       const approvedEvent = await this.eventRepository.save(event);
       console.log(event.user.email, event.user);
 
-      // Enviar correo al cliente que creó el evento
       if (event.user && event.user.email) {
         const email = event.user.email;
         const name = event.user.name;
         const eventName = event.name;
 
         console.log(
-          `Enviando correo a ${email} para notificar la aprobación del evento "${eventName}".`,
+          `Sending mail to ${email} to notify the approval of the event "${eventName}".`,
         );
 
         await sendApprovalEmail(email, name, eventName);
-        console.log(`Correo de aprobación enviado a ${email}`);
+        console.log(`Approval email sent to ${email}`);
       } else {
         console.log(
-          'El evento no tiene un usuario asociado con un email válido.',
+          'The event does not have an associated user with a valid email.',
         );
       }
 
       return approvedEvent;
     } catch (error) {
-      throw new HttpException(
-        'Fallo en la aprobacion del evento',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Event approval failed', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -296,22 +275,21 @@ export class EventService {
 
     if (!event) {
       throw new HttpException(
-        `Evento con ID ${eventId} no encontrado`,
+        `Event with ID ${eventId} not found`,
         HttpStatus.NOT_FOUND,
       );
     }
 
     if (user.role !== Role.Admin && event.user.userId !== user.userId) {
       throw new HttpException(
-        'No tienes permisos para eliminar este evento',
+        'You do not have permission to delete this event',
         HttpStatus.FORBIDDEN,
       );
     }
 
     try {
-      // Eliminar el evento
       await this.eventRepository.remove(event);
-      return { message: 'Evento eliminado exitosamente' };
+      return { message: 'Event successfully deleted' };
     } catch (error) {
       throw new HttpException('Failed to delete event', HttpStatus.BAD_REQUEST);
     }

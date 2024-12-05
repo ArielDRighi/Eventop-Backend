@@ -68,7 +68,6 @@ export class EventController {
     }
   }
 
-  //Metodo solo para testear el broadcast y ver si llega la info
   @Get('test-broadcast/:eventId/:quantityAvailable')
   testBroadcast(
     @Param('eventId') eventId: number,
@@ -97,26 +96,23 @@ export class EventController {
   @ApiBody({ type: CreateEventDto })
   @UseInterceptors(FileInterceptor('image'))
   async createEvent(
-    @Body('data') data: any, // Lo recibimos como 'any' para manejar el texto JSON.
+    @Body('data') data: any,
     @UploadedFile() file: Express.Multer.File,
     @Request() req,
   ) {
     try {
       const userId = req.user.userId;
       console.log(userId);
-      // Parseamos el campo body que contiene el JSON.
+
       const createEventDto: CreateEventDto = JSON.parse(data);
 
-      // Subimos la imagen a Cloudinary y obtenemos la URL
       const imageUrl = await this.cloudinaryService.uploadImage(file);
 
-      // Creamos el evento
       const event = {
         ...createEventDto,
         imageUrl,
       };
 
-      // Guardamos el evento en la base de datos
       const eventCreated = await this.eventService.createEvent(event, userId);
 
       return { message: 'Evento creado exitosamente', eventCreated };
