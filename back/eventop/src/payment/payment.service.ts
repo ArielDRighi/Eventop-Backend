@@ -99,8 +99,6 @@ export class PaymentService {
         updatedInventoryCount,
       );
 
-      await sendPurchaseEmail(email, name, event.name);
-
       // Verificar si la preferencia fue creada correctamente y si la transacción fue aprobada
       if (response.auto_return === 'approved') {
         // Solo enviar el correo si el pago fue aprobado
