@@ -38,6 +38,15 @@ export class UpdateEventDto {
   date: Date;
 
   @ApiProperty({
+    type: String,
+    description: 'The time of the event',
+    required: true,
+  })
+  @IsString()
+  @IsOptional()
+  time?: string;
+
+  @ApiProperty({
     type: Number,
     description: 'The price of the event',
     required: false,

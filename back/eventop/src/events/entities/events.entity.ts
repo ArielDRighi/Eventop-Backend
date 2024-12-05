@@ -23,6 +23,9 @@ export class Event {
   @Column({ type: 'date' })
   date: Date;
 
+  @Column({ type: 'varchar', length: 5 })
+  time: string;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.0 })
   price: number;
 
