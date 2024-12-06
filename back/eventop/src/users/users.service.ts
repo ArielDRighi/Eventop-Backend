@@ -68,7 +68,7 @@ export class UserService {
       const { password: _, ...result } = savedUser;
       return result;
     } catch (error) {
-      throw new BadRequestException('Error al crear el usuario', error);
+      throw new BadRequestException('Error creating user', error);
     }
   }
 
@@ -83,10 +83,7 @@ export class UserService {
       });
       return users.map(({ password, ...user }) => user);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener los usuarios',
-        error,
-      );
+      throw new InternalServerErrorException('Error getting users', error);
     }
   }
 
@@ -98,13 +95,13 @@ export class UserService {
       const user = await this.userRepository.findOne({ where: { userId } });
       if (!user) {
         throw new HttpException(
-          `Usuario con ID ${userId} inexistente`,
+          `User with ID ${userId} non-existent`,
           HttpStatus.NOT_FOUND,
         );
       }
       if (Object.keys(updateUserDto).length === 0) {
         throw new HttpException(
-          'No se proporcionaron datos para actualizar',
+          'No data provided to update',
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -115,10 +112,7 @@ export class UserService {
       const { password, ...result } = updatedUser;
       return result;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al actualizar el usuario',
-        error,
-      );
+      throw new InternalServerErrorException('Error updating user', error);
     }
   }
 
@@ -166,7 +160,7 @@ export class UserService {
   async banUser(userId: number, reason: string, permanent: boolean) {
     const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     if (permanent) {
@@ -180,30 +174,27 @@ export class UserService {
 
         await sendBanNotification(user.email, reason, permanent);
         return {
-          message: 'Usuario baneado permanentemente y eliminado exitosamente',
+          message: 'User permanently banned and successfully deleted',
         };
       } catch (error) {
-        throw new HttpException(
-          'Error al eliminar el usuario',
-          HttpStatus.BAD_REQUEST,
-        );
+        throw new HttpException('Error deleting user', HttpStatus.BAD_REQUEST);
       }
     } else {
       user.isBanned = true;
       user.banReason = reason;
-      user.banUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 días
+      user.banUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       await this.userRepository.save(user);
       await sendBanNotification(user.email, reason, permanent);
 
-      return { message: 'Usuario baneado temporalmente exitosamente' };
+      return { message: 'User temporarily banned successfully' };
     }
   }
 
   async unbanUser(userId: number) {
     const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     user.isBanned = false;
@@ -214,23 +205,20 @@ export class UserService {
 
     await sendUnbanNotification(user.email);
 
-    return { message: 'Usuario desbaneado exitosamente' };
+    return { message: 'User successfully unbanned' };
   }
 
   async deleteUser(userId: number): Promise<{ message: string }> {
     const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     try {
       await this.userRepository.remove(user);
-      return { message: 'Usuario eliminado exitosamente' };
+      return { message: 'User successfully deleted' };
     } catch (error) {
-      throw new HttpException(
-        'Error al eliminar el usuario',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Error deleting user', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -239,17 +227,14 @@ export class UserService {
       const user = await this.userRepository.findOne({ where: { userId } });
       if (!user) {
         throw new HttpException(
-          `Usuario con ID ${userId} inexistente`,
+          `User with ID ${userId} non-existent`,
           HttpStatus.NOT_FOUND,
         );
       }
       await this.userRepository.update(userId, { password: hashedPassword });
       return { message: 'Contraseña actualizada exitosamente' };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al actualizar la contraseña',
-        error,
-      );
+      throw new InternalServerErrorException('Error updating password', error);
     }
   }
 

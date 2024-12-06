@@ -46,17 +46,17 @@ export class AuthService {
   async signIn(credential: SignInAuthDto) {
     const dbUser = await this.userService.findOneByEmail(credential.email);
     if (!dbUser) {
-      throw new BadRequestException('Usuario no encontrado');
+      throw new BadRequestException('User not found');
     }
     if (dbUser.isBanned) {
-      throw new BadRequestException(`Usuario baneado: ${dbUser.banReason}`);
+      throw new BadRequestException(`Banned user: ${dbUser.banReason}`);
     }
     const isPasswordValid = await bcrypt.compare(
       credential.password,
       dbUser.password,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Contraseña invalida');
+      throw new BadRequestException('Invalid password');
     }
     const payload = {
       username: dbUser.email,
@@ -80,46 +80,37 @@ export class AuthService {
   }
 
   async signUp(user: CreateUserDto) {
-    console.log(
-      'Iniciando el proceso de registro para el usuario:',
-      user.email,
-    );
+    console.log('Starting the registration process for the user:', user.email);
 
-    // Revisamos que las contraseñas coincidan
     if (user.password !== user.confirmPassword) {
-      throw new BadRequestException('Las contraseñas no coinciden');
+      throw new BadRequestException('Passwords do not match');
     }
 
-    // Revisamos si el email ya existe en la DB
     const dbUser = await this.userService.findOneByEmail(user.email);
     if (dbUser) {
-      throw new BadRequestException('El email ya está registrado');
+      throw new BadRequestException('The email is already registered');
     }
 
-    // Hasheamos la contraseña
     const hashedPassword = await bcrypt.hash(user.password, 10);
     const newUser = {
       ...user,
       password: hashedPassword,
     };
 
-    // Creamos el nuevo usuario en la base de datos
     const createdUser = await this.userService.createUser(newUser);
-    console.log('Usuario creado exitosamente:', createdUser.email);
+    console.log('User created successfully:', createdUser.email);
 
-    // Enviar el correo de bienvenida al usuario después de la creación
     try {
-      console.log('Intentando enviar el correo de bienvenida a:', user.email);
-      await sendWelcomeEmail(user.email, user.name); // Enviar correo de registro
-      console.log('Correo de bienvenida enviado correctamente a:', user.email);
+      console.log('Trying to send the welcome email to:', user.email);
+      await sendWelcomeEmail(user.email, user.name);
+      console.log('Welcome email sent successfully to:', user.email);
     } catch (error) {
-      console.error('Error al enviar el correo de bienvenida:', error);
+      console.error('Error sending welcome email:', error);
       throw new BadRequestException(
-        'Hubo un problema al enviar el correo de bienvenida',
+        'There was a problem sending the welcome email',
       );
     }
 
-    // Devolvemos el usuario creado (sin la contraseña)
     return { ...createdUser, password: undefined };
   }
 
@@ -140,7 +131,7 @@ export class AuthService {
       user.password,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Contraseña invalida');
+      throw new BadRequestException('Invalid password');
     }
     const hashedPassword = await bcrypt.hash(passwords.newPassword, 10);
     return await this.userService.updatePassword(user.userId, hashedPassword);
@@ -153,7 +144,7 @@ export class AuthService {
     }
     const { password, confirmPassword } = passwords;
     if (password !== confirmPassword) {
-      throw new BadRequestException('Las contraseñas no coinciden');
+      throw new BadRequestException('Passwords do not match');
     }
     const hashedPassword = await bcrypt.hash(password, 10);
     return await this.userService.updatePassword(user.userId, hashedPassword);
@@ -164,7 +155,7 @@ export class AuthService {
     console.log(user);
 
     if (!user) {
-      throw new BadRequestException('Usuario no encontrado');
+      throw new BadRequestException('User not found');
     }
     const newPassword = this.generatePassword();
     console.log(newPassword);
@@ -174,8 +165,8 @@ export class AuthService {
     try {
       await sendForgotPasswordEmail(email, newPassword);
     } catch (error) {
-      throw new BadRequestException('Error al enviar el correo');
+      throw new BadRequestException('Error sending email');
     }
-    return { message: 'Correo enviado' };
+    return { message: 'Mail sent' };
   }
 }

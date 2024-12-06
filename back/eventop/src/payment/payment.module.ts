@@ -27,7 +27,7 @@ import { LocationsModule } from '@app/locations/locations.module';
     UserService,
     EventService,
     MonitorInventarioGateway,
-  ], // Añade el gateway a los proveedores
+  ],
   exports: [PaymentService],
 })
 export class PaymentModule {}
