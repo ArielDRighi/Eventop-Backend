@@ -356,7 +356,6 @@ export const sendClientRequest = async (
         <a href="https://eventop-frontend.vercel.app/admin/users" 
           style="display: inline-block; padding: 12px 24px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
         Autorizar solicitud
-  }}
         </a>
       </p>
     `;
