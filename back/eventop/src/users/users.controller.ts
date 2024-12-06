@@ -17,6 +17,7 @@ import {
   Query,
   Delete,
   NotFoundException,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -38,6 +39,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '@app/events/cloudinary.service';
 import { BanUserDto } from './dto/ban-user.dto';
 import { UpdateRoleDto } from './dto/UpdateRoleDto';
+import { RequestClientDto } from './dto/requestClient.Dto';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -203,6 +205,15 @@ export class UserController {
       banUserDto.permanent,
     );
   }
+  @Roles(Role.User)
+  @Post('request-client')
+  async requestClientRole(@Body()
+  data: RequestClientDto
+) {
+    await this.userService.requestClientRole(data);
+    return { message: 'Solicitud enviada a los administradores' };
+  }
+
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)

@@ -19,7 +19,9 @@ import { BannedEmail } from './entities/banned-email.entity';
 import {
   sendBanNotification,
   sendUnbanNotification,
+  sendClientRequest
 } from '@app/config/nodeMailer';
+import { RequestClientDto } from './dto/requestClient.Dto';
 
 @Injectable()
 export class UserService {
@@ -75,6 +77,7 @@ export class UserService {
       throw new BadRequestException('Error creating user', error);
     }
   }
+  
 
   async getAllUsers(
     page: number = 1,
@@ -259,4 +262,33 @@ export class UserService {
     }
     return total;
   }
-}
+  async requestClientRole(data: RequestClientDto) {
+    const { email, name, description } = data;
+  
+    try {
+      // Obtiene los correos de los administradores
+      const adminUsers = await this.userRepository.find({
+        where: { role: Role.Admin }, 
+        select: ['email'], 
+      });
+  
+      const adminEmails = adminUsers.map((admin) => admin.email);
+  
+      if (adminEmails.length === 0) {
+        throw new Error('No hay administradores registrados para recibir solicitudes.');
+      }
+  
+      // Enviar correo a los administradores
+      await sendClientRequest(adminEmails, email, name, description);
+  
+      console.log(
+        `Solicitud de cliente enviada: ${name} (${email}) a administradores: ${adminEmails}`,
+      );
+  
+      return { message: 'Solicitud enviada a los administradores.' };
+    } catch (error) {
+      console.error('Error al enviar la solicitud de cliente:', error);
+      throw new Error('No se pudo enviar la solicitud de cliente. Inténtelo más tarde.');
+    }
+
+}}
