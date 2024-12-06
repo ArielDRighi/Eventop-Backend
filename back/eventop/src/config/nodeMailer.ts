@@ -237,7 +237,7 @@ export const sendUnbanNotification = async (email: string) => {
     <p style="font-size: 16px; margin-bottom: 20px;">Nos alegra informarte que tu cuenta ha sido <strong>desbaneada</strong>. Ahora tienes acceso completo a todos los servicios de nuestra plataforma.</p>
     <p style="font-size: 14px; margin-bottom: 20px; color: #4CAF50;">Si tienes alguna consulta o necesitas asistencia, no dudes en contactarnos.</p>
     <p style="text-align: center; margin-top: 30px;">
-      <a href="https://example.com/inicio-sesion" 
+      <a href="https://eventop-frontend.vercel.app" 
          style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
         Iniciar sesión ahora
       </a>
@@ -273,7 +273,7 @@ export const sendPassword = async (email: string, password: string) => {
     <p style="font-size: 16px; margin-bottom: 20px;">Tu nueva contraseña temporal es: <strong>${password}</strong></p>
     <p style="font-size: 14px; margin-bottom: 20px; color: #d32f2f;">Te recomendamos cambiar esta contraseña lo antes posible desde tu perfil para mayor seguridad.</p>
     <p style="text-align: center; margin-top: 30px;">
-      <a href="https://eventop.com/mi-perfil" 
+      <a href="https://eventop-frontend.vercel.app/micuenta" 
          style="display: inline-block; padding: 12px 24px; background-color: #FF5722; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
         Cambiar mi contraseña
       </a>
