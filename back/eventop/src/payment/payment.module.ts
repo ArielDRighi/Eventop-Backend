@@ -13,10 +13,18 @@ import { Comment } from '@app/users/entities/comments.entity';
 import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway'; // Importa el gateway
 import { UsersModule } from '@app/users/users.module';
 import { LocationsModule } from '@app/locations/locations.module';
+import { Ticket } from './entities/tickets.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Location, Event, Category, Comment]),
+    TypeOrmModule.forFeature([
+      User,
+      Location,
+      Event,
+      Category,
+      Comment,
+      Ticket,
+    ]),
 
     UsersModule,
     LocationsModule,
