@@ -86,8 +86,8 @@ export class PaymentService {
             email: user.email,
           },
           back_urls: {
-            success: `https://eventop-frontend.vercel.app/${event.eventId}`,
-            failure: `https://eventop-frontend.vercel.app/${event.eventId}`,
+            success: `https://eventop-frontend.vercel.app/success/${event.eventId}`,
+            failure: `https://eventop-frontend.vercel.app/failure/${event.eventId}`,
             pending: 'https://www.tu-sitio.com/pending',
           },
           notification_url:
