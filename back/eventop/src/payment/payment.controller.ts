@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Param,Query, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Query,
+  Put,
+  BadRequestException,
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentDto } from './dto/Payment.dto';
 
@@ -13,27 +22,44 @@ export class PaymentController {
   }
 
   @Get('status/:pref_id')
-async getPaymentStatus(@Param('pref_id') prefId: string) {
-  const status = await this.paymentService.getPaymentStatus(prefId);
-  console.log(status);
-  return status;
-}
+  async getPaymentStatus(@Param('pref_id') prefId: string) {
+    const status = await this.paymentService.getPaymentStatus(prefId);
+    console.log(status);
+    return status;
+  }
 
-@Get('success/:id')
+  @Post('success')
   async handlePaymentSuccess(
-    @Query('collection_status') collectionStatus: boolean,
-    @Query('payment_id') paymentId: string,
-    @Query('status') status: boolean,
-    @Query('preference_id') preference_id: string,
-    @Param('id') id: number,
+    @Body('collection_status') collectionStatus: boolean,
+    @Body('payment_id') paymentId: string,
+    @Body('status') status: boolean,
+    @Body('preference_id') preferenceId: string,
+    @Body('id') id: number,
   ) {
     console.log('Collection Status:', collectionStatus);
     console.log('Payment ID:', paymentId);
     console.log('Status:', status);
     console.log('ID:', id);
-    
+    try {
+      const payment = await this.paymentService.handlePaymentSuccess(
+        collectionStatus,
+        paymentId,
+        status,
+        id,
+        preferenceId,
+      );
+      return payment;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
-    const payment = await this.paymentService.handlePaymentSuccess(collectionStatus, paymentId, status,id,preference_id);
-    return payment;
+  @Get('failure')
+  async handlePaymentFailure() {
+    try {
+      return 'Ocurrio un error al realizar el pago';
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
