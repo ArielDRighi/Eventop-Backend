@@ -21,6 +21,7 @@ import {
   sendUnbanNotification,
   sendClientRequest
 } from '@app/config/nodeMailer';
+import { RequestClientDto } from './dto/requestClient.Dto';
 
 @Injectable()
 export class UserService {
@@ -261,8 +262,8 @@ export class UserService {
     }
     return total;
   }
-  async requestClientRole(user: any) {
-    const { email, name } = user;
+  async requestClientRole(data: RequestClientDto) {
+    const { email, name, description } = data;
   
     try {
       // Obtiene los correos de los administradores
@@ -278,7 +279,7 @@ export class UserService {
       }
   
       // Enviar correo a los administradores
-      await sendClientRequest(adminEmails, email, name);
+      await sendClientRequest(adminEmails, email, name, description);
   
       console.log(
         `Solicitud de cliente enviada: ${name} (${email}) a administradores: ${adminEmails}`,

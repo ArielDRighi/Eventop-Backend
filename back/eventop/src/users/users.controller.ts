@@ -39,6 +39,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '@app/events/cloudinary.service';
 import { BanUserDto } from './dto/ban-user.dto';
 import { UpdateRoleDto } from './dto/UpdateRoleDto';
+import { RequestClientDto } from './dto/requestClient.Dto';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -206,9 +207,10 @@ export class UserController {
   }
   @Roles(Role.User)
   @Post('request-client')
-  async requestClientRole(@Req() req: any) {
-    const user = req.user; 
-    await this.userService.requestClientRole(user);
+  async requestClientRole(@Body()
+  data: RequestClientDto
+) {
+    await this.userService.requestClientRole(data);
     return { message: 'Solicitud enviada a los administradores' };
   }
 

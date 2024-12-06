@@ -339,12 +339,13 @@ export const sendForgotPasswordEmail = async (
       error,
     );
   }}
-  export const sendClientRequest = async (adminsEmails: string[],email: string, user: string) => {
+  export const sendClientRequest = async (adminsEmails: string[],email: string, user: string, description: string) => {
 
     const subject = '📧 Solicitud para ser Cliente';  
     const body = `
       <p style="font-size: 16px; margin-bottom: 20px;">Hola,</p>
       <p style="font-size: 16px; margin-bottom: 20px;">Nos complace informarte que ${user}, ${email}ha solicitado ser cliente de Eventop.</p>
+      <p style="font-size: 16px; margin-bottom: 20px;">Su solicitud es:${description}</p>
       <p style="font-size: 16px; margin-bottom: 20px;">En breve nos pondremos en contacto contigo.</p>
       <p style="text-align: center; margin-top: 30px;">
         <a href="https://eventop-frontend.vercel.app/admin/users" 
