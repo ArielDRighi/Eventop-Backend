@@ -9,6 +9,7 @@ import {
 import { Event } from '@app/events/entities/events.entity';
 import { Comment } from './comments.entity';
 import { Exclude } from 'class-transformer';
+import { Ticket } from '@app/payment/entities/tickets.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -56,4 +57,7 @@ export class User {
 
   @Column({ nullable: true })
   banUntil: Date;
+
+  @OneToMany(() => Ticket, (ticket) => ticket.user)
+  tickets: Ticket[];
 }

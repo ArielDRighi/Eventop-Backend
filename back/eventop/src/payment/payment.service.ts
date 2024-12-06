@@ -3,6 +3,8 @@ import {
   NotFoundException,
   Inject,
   BadRequestException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import MercadoPagoConfig, { Payment, Preference } from 'mercadopago';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +18,7 @@ import { config as dotenvConfig } from 'dotenv';
 import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway';
 import { Client } from 'socket.io/dist/client';
 import { LocationService } from '@app/locations/locations.service';
+import { Ticket } from './entities/tickets.entity';
 
 dotenvConfig({ path: '.env' });
 
@@ -32,6 +35,8 @@ export class PaymentService {
     private readonly userService: UserService,
     private readonly monitorInventarioGateway: MonitorInventarioGateway,
     private readonly locationService: LocationService,
+    @InjectRepository(Ticket)
+    private readonly ticketRepository: Repository<Ticket>,
   ) {}
 
   async createPreference(data: PaymentDto) {
@@ -160,11 +165,27 @@ export class PaymentService {
     const address = event.location_id.address;
     const date = event.date;
     const time = event.time;
-    console.log(event);
 
-    await sendPurchaseEmail(email, name, event.name, address, date, time);
+    try {
+      const newTicket = this.ticketRepository.create({
+        preferenceId: paymentId,
+        quantity: response.items[0].quantity,
+        price: response.items[0].unit_price,
+        event: event,
+        user: response.payer,
+      });
 
-    return { message: ' El pago fue aprobado con exito' };
+      await this.ticketRepository.save(newTicket);
+      console.log('Ticket saved successfully:', newTicket);
+      await sendPurchaseEmail(email, name, event.name, address, date, time);
+      return { message: 'Entrada adquirida con exito!' };
+    } catch (error) {
+      console.error('Error saving ticket:', error);
+      throw new HttpException(
+        'Failed to save ticket',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   private async getUpdatedInventoryCount(eventId: number): Promise<number> {
@@ -196,10 +217,26 @@ export class PaymentService {
     const address = event.location_id.address;
     const date = event.date;
     const time = event.time;
-    console.log(event);
 
-    await sendPurchaseEmail(email, name, event.name, address, date, time);
+    try {
+      const newTicket = this.ticketRepository.create({
+        preferenceId: 'free',
+        quantity: data.quantity,
+        price: event.price,
+        event: event,
+        user: user,
+      });
 
-    return { message: 'Entrada adquirida con exito!' };
+      await this.ticketRepository.save(newTicket);
+      console.log('Ticket saved successfully:', newTicket);
+      await sendPurchaseEmail(email, name, event.name, address, date, time);
+      return { message: 'Entrada adquirida con exito!' };
+    } catch (error) {
+      console.error('Error saving ticket:', error);
+      throw new HttpException(
+        'Failed to save ticket',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
