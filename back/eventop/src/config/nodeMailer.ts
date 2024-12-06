@@ -312,7 +312,7 @@ export const sendForgotPasswordEmail = async (
     <p style="font-size: 16px; margin-bottom: 20px;">Hemos generado una nueva contraseña temporal para tu cuenta: <strong style="color: #FF5722;">${newPassword}</strong></p>
     <p style="font-size: 14px; margin-bottom: 20px; color: #d32f2f;">Por tu seguridad, te recomendamos cambiar esta contraseña en cuanto inicies sesión.</p>
     <p style="text-align: center; margin-top: 30px;">
-      <a href="https://eventop-frontend.vercel.app/" 
+      <a href="https://eventop-frontend.vercel.app/login" 
          style="display: inline-block; padding: 12px 24px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
         Cambiar mi contraseña
       </a>
