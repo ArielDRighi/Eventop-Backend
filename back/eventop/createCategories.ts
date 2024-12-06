@@ -3,11 +3,11 @@ import { Category } from '@app/categories/entities/categories.entity';
 import { connectionSource } from '@app/config/typeorm';
 
 const categories = [
-  { name: 'Music' },
-  { name: 'Sports' },
-  { name: 'Technology' },
-  { name: 'Art' },
-  { name: 'Food' },
+  { name: 'Música' },
+  { name: 'Deportes' },
+  { name: 'Tecnología' },
+  { name: 'Arte' },
+  { name: 'Gastronomía' },
 ];
 
 async function createCategories() {
