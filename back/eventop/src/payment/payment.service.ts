@@ -92,7 +92,7 @@ export class PaymentService {
           },
           back_urls: {
             success: `https://eventop-frontend.vercel.app/payment/success/${event.eventId}`,
-            failure: `https://eventop-frontend.vercel.app/payment//failure/${event.eventId}`,
+            failure: `https://eventop-frontend.vercel.app/payment/failure/${event.eventId}`,
             pending: 'https://www.tu-sitio.com/pending',
           },
           notification_url:
@@ -128,7 +128,6 @@ export class PaymentService {
   ) {
     const preference = new Preference(client);
     const response = await preference.get({ preferenceId: preference_id });
-    console.log(response);
 
     const event = await this.eventRepository.findOne({
       where: { eventId: id },
@@ -139,11 +138,9 @@ export class PaymentService {
     }
     const eventId = id;
     if (collectionStatus == false) {
-      console.log('El no pago fue aprobado');
       throw new BadRequestException('Payment was not approved');
     }
     if (status == false) {
-      console.log('El no pago fue aprobado');
       throw new BadRequestException('Payment was not approved');
     }
     if (!paymentId) {
@@ -160,6 +157,8 @@ export class PaymentService {
       updatedInventoryCount,
     );
 
+    const user = await this.userService.findOneByEmail(response.payer.email);
+
     const email = response.payer.email;
     const name = response.payer.name;
     const address = event.location_id.address;
@@ -172,11 +171,10 @@ export class PaymentService {
         quantity: response.items[0].quantity,
         price: response.items[0].unit_price,
         event: event,
-        user: response.payer,
+        user: user,
       });
 
       await this.ticketRepository.save(newTicket);
-      console.log('Ticket saved successfully:', newTicket);
       await sendPurchaseEmail(email, name, event.name, address, date, time);
       return { message: 'Entrada adquirida con exito!' };
     } catch (error) {
@@ -228,7 +226,6 @@ export class PaymentService {
       });
 
       await this.ticketRepository.save(newTicket);
-      console.log('Ticket saved successfully:', newTicket);
       await sendPurchaseEmail(email, name, event.name, address, date, time);
       return { message: 'Entrada adquirida con exito!' };
     } catch (error) {
