@@ -261,12 +261,13 @@ export class EventService {
         const email = event.user.email;
         const name = event.user.name;
         const eventName = event.name;
+        const eventId = event.eventId;
 
         console.log(
           `Enviando correo a ${email} para notificar la aprobación del evento "${eventName}".`,
         );
 
-        await sendApprovalEmail(email, name, eventName);
+        await sendApprovalEmail(email, name, eventName, eventId);
         console.log(`Correo de aprobación enviado a ${email}`);
       } else {
         console.log(

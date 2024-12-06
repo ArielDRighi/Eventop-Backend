@@ -4,8 +4,10 @@ import { CreateUserDto } from './dto/createUser.dto';
 import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { sendWelcomeEmail } from '@app/config/nodeMailer';
-import { MailService } from '@app/mail/mail.service';
+import {
+  sendForgotPasswordEmail,
+  sendWelcomeEmail,
+} from '@app/config/nodeMailer';
 import { Role } from './enum/roles.enum';
 import { User } from '@app/users/entities/users.entity';
 import { ChangePasswordDto } from './dto/changePassword.dto';
@@ -16,7 +18,6 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly mailService: MailService,
   ) {}
   generatePassword(): string {
     const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
@@ -171,7 +172,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await this.userService.updatePassword(user.userId, hashedPassword);
     try {
-      await this.mailService.sendForgotPasswordEmail(email, newPassword);
+      await sendForgotPasswordEmail(email, newPassword);
     } catch (error) {
       throw new BadRequestException('Error al enviar el correo');
     }

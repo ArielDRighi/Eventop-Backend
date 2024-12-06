@@ -16,6 +16,7 @@ import { PaymentDto } from './dto/Payment.dto';
 import { config as dotenvConfig } from 'dotenv';
 import { MonitorInventarioGateway } from '../gateways/monitor-inventario/monitor-inventario.gateway';
 import { Client } from 'socket.io/dist/client';
+import { LocationService } from '@app/locations/locations.service';
 
 dotenvConfig({ path: '.env' });
 
@@ -25,13 +26,13 @@ const client = new MercadoPagoConfig({
 
 @Injectable()
 export class PaymentService {
-  
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
     private readonly eventService: EventService,
     private readonly userService: UserService,
     private readonly monitorInventarioGateway: MonitorInventarioGateway,
+    private readonly locationService: LocationService,
   ) {}
 
   async createPreference(data: PaymentDto) {
@@ -79,7 +80,6 @@ export class PaymentService {
               picture_url: event.imageUrl,
               category_id: 'tickets',
             },
-
           ],
           marketplace_fee: 0,
           payer: {
@@ -91,55 +91,58 @@ export class PaymentService {
             failure: `http://localhost:3001/payment/failure/${event.eventId}`,
             pending: 'https://www.tu-sitio.com/pending',
           },
-          notification_url: 'https://eventop-backend.onrender.com/notifications?source_news=webhooks',
-          expires:false,
+          notification_url:
+            'https://eventop-backend.onrender.com/notifications?source_news=webhooks',
+          expires: false,
           auto_return: 'all',
-          binary_mode:true,
+          binary_mode: true,
           statement_descriptor: 'Eventop',
         },
       });
-      
-
-      
 
       console.log(response.id);
-      
-      return response.id;
-    
 
-      
+      return response.id;
     } catch (error) {
       console.log('Error', error);
       throw error;
     }
   }
-  
+
   async getPaymentStatus(paymentId: string) {
     const preference = new Preference(client);
-    const response = await preference.get({preferenceId: paymentId});
+    const response = await preference.get({ preferenceId: paymentId });
     return response;
   }
 
-  async handlePaymentSuccess(collectionStatus: boolean, paymentId: string, status: boolean,id:number, preference_id: string) {
+  async handlePaymentSuccess(
+    collectionStatus: boolean,
+    paymentId: string,
+    status: boolean,
+    id: number,
+    preference_id: string,
+  ) {
     const preference = new Preference(client);
-    const response = await preference.get({preferenceId: preference_id});
+    const response = await preference.get({ preferenceId: preference_id });
     console.log(response);
 
-
-    const event = await this.eventRepository.findOne({where: {eventId: id}});
-    if(!event){
+    const event = await this.eventRepository.findOne({
+      where: { eventId: id },
+      relations: ['location_id'],
+    });
+    if (!event) {
       throw new NotFoundException('Event not found');
     }
     const eventId = id;
-    if(collectionStatus == false ){
+    if (collectionStatus == false) {
       console.log('El no pago fue aprobado');
       throw new BadRequestException('Payment was not approved');
     }
-    if(status == false) {
+    if (status == false) {
       console.log('El no pago fue aprobado');
       throw new BadRequestException('Payment was not approved');
     }
-    if(!paymentId){
+    if (!paymentId) {
       throw new BadRequestException('Payment ID is required');
     }
     // Obtener la cantidad actualizada de entradas disponibles
@@ -153,23 +156,20 @@ export class PaymentService {
       updatedInventoryCount,
     );
 
-      const email = response.payer.email;
-      const name = response.payer.name;
-    
-      console.log(email,name);
+    const email = response.payer.email;
+    const name = response.payer.name;
+    const address = event.location_id.address;
+    const date = event.date;
+    const time = event.time;
+    console.log(event);
 
-      await sendPurchaseEmail(email,name, event.name);
+    await sendPurchaseEmail(email, name, event.name, address, date, time);
 
-    return ({message:" El pago fue aprobado con exito"})
-    
+    return { message: ' El pago fue aprobado con exito' };
   }
 
   private async getUpdatedInventoryCount(eventId: number): Promise<number> {
     const event = await this.eventService.getEventById(eventId);
     return event.quantityAvailable; // Suponiendo que el evento tiene una propiedad quantityAvailable
   }
-
-
-
-
 }
