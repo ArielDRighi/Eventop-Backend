@@ -62,4 +62,14 @@ export class PaymentController {
       throw new BadRequestException(error.message);
     }
   }
+
+  @Post('free')
+  async handleFreePayment(@Body() data: PaymentDto) {
+    try {
+      const payment = await this.paymentService.handleFreePayment(data);
+      return payment;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }

@@ -171,4 +171,35 @@ export class PaymentService {
     const event = await this.eventService.getEventById(eventId);
     return event.quantityAvailable; // Suponiendo que el evento tiene una propiedad quantityAvailable
   }
+
+  async handleFreePayment(data: PaymentDto) {
+    const user = await this.userService.findOneByEmail(data.email);
+    if (!user) {
+      throw new NotFoundException(`User with email ${data.email} not found`);
+    }
+    const event = await this.eventService.getEventById(data.eventId);
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    const updatedInventoryCount = await this.getUpdatedInventoryCount(
+      Number(event.eventId),
+    );
+
+    // Transmitir la actualización de inventario
+    this.monitorInventarioGateway.broadcastInventoryUpdate(
+      Number(event.eventId),
+      updatedInventoryCount,
+    );
+
+    const email = user.email;
+    const name = user.name;
+    const address = event.location_id.address;
+    const date = event.date;
+    const time = event.time;
+    console.log(event);
+
+    await sendPurchaseEmail(email, name, event.name, address, date, time);
+
+    return { message: 'Entrada adquirida con exito!' };
+  }
 }
