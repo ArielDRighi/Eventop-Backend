@@ -8,7 +8,6 @@ import { CategoriesModule } from './categories/categories.module';
 import { LocationsModule } from './locations/locations.module';
 import TypeOrmConfig from './config/typeorm';
 import { PaymentModule } from './payment/payment.module';
-import { MailModule } from './mail/mail.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MonitorInventarioGateway } from './gateways/monitor-inventario/monitor-inventario.gateway';
 import googleOauthConfig from './config/google-oauth.config';
@@ -48,7 +47,6 @@ import googleOauthConfig from './config/google-oauth.config';
     CategoriesModule,
     LocationsModule,
     PaymentModule,
-    MailModule,
   ],
   controllers: [],
   providers: [MonitorInventarioGateway],

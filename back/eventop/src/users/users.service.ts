@@ -13,8 +13,12 @@ import { User } from './entities/users.entity';
 import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { Comment } from './entities/comments.entity';
-import { MailService } from '../mail/mail.service';
+// import { MailService } from '../mail/mail.service';
 import { BannedEmail } from './entities/banned-email.entity';
+import {
+  sendBanNotification,
+  sendUnbanNotification,
+} from '@app/config/nodeMailer';
 
 @Injectable()
 export class UserService {
@@ -24,7 +28,7 @@ export class UserService {
     private readonly commentRepository: Repository<Comment>,
     @InjectRepository(BannedEmail)
     private readonly bannedEmailRepository: Repository<BannedEmail>,
-    private readonly mailService: MailService,
+    // private readonly mailService: MailService,
   ) {}
 
   async findOneUser(userId: number): Promise<User> {
@@ -168,11 +172,7 @@ export class UserService {
 
         await this.userRepository.remove(user);
 
-        await this.mailService.sendBanNotification(
-          user.email,
-          reason,
-          permanent,
-        );
+        await sendBanNotification(user.email, reason, permanent);
         return {
           message: 'User permanently banned and successfully deleted',
         };
@@ -185,7 +185,7 @@ export class UserService {
       user.banUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
       await this.userRepository.save(user);
-      await this.mailService.sendBanNotification(user.email, reason, permanent);
+      await sendBanNotification(user.email, reason, permanent);
 
       return { message: 'User temporarily banned successfully' };
     }
@@ -202,7 +202,8 @@ export class UserService {
     user.banUntil = null;
 
     await this.userRepository.save(user);
-    await this.mailService.sendUnbanNotification(user.email);
+
+    await sendUnbanNotification(user.email);
 
     return { message: 'User successfully unbanned' };
   }

@@ -7,7 +7,6 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MailService } from '@app/mail/mail.service';
 import googleOauthConfig from '@app/config/google-oauth.config';
 import { GoogleStrategy } from './google.strategy';
 
@@ -28,7 +27,7 @@ import { GoogleStrategy } from './google.strategy';
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy, MailService, GoogleStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
