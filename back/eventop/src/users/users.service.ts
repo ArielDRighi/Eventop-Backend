@@ -10,6 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/users.entity';
+import { Role } from '../auth/enum/roles.enum';
 import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { Comment } from './entities/comments.entity';
@@ -85,6 +86,15 @@ export class UserService {
     } catch (error) {
       throw new InternalServerErrorException('Error getting users', error);
     }
+  }
+
+  async updateUserRole(userId: number, role: Role): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+    user.role = role;
+    return await this.userRepository.save(user);
   }
 
   async updateUser(
