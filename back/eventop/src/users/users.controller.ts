@@ -112,7 +112,6 @@ export class UserController {
     return await this.userService.updateUserRole(userId, updateRoleDto.role);
   }
 
-
   @Roles(Role.Admin, Role.User, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Put(':id')
@@ -152,8 +151,6 @@ export class UserController {
     }
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard('jwt'), RoleGuard)
   @Get('comments')
   async getAllComments() {
     try {
@@ -207,13 +204,13 @@ export class UserController {
   }
   @Roles(Role.User)
   @Post('request-client')
-  async requestClientRole(@Body()
-  data: RequestClientDto
-) {
+  async requestClientRole(
+    @Body()
+    data: RequestClientDto,
+  ) {
     await this.userService.requestClientRole(data);
     return { message: 'Solicitud enviada a los administradores' };
   }
-
 
   @Roles(Role.Admin)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
