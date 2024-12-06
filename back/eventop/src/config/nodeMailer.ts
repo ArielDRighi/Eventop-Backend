@@ -338,42 +338,47 @@ export const sendForgotPasswordEmail = async (
       `Error al enviar el correo de recuperación de contraseña a ${email}:`,
       error,
     );
-  }}
-  export const sendClientRequest = async (adminsEmails: string[],email: string, user: string, description: string) => {
-
-    const subject = '📧 Solicitud para ser Cliente';  
-    const body = `
+  }
+};
+export const sendClientRequest = async (
+  adminsEmails: string[],
+  email: string,
+  user: string,
+  description: string,
+) => {
+  const subject = '📧 Solicitud para ser Cliente';
+  const body = `
       <p style="font-size: 16px; margin-bottom: 20px;">Hola,</p>
       <p style="font-size: 16px; margin-bottom: 20px;">Nos complace informarte que ${user}, ${email}ha solicitado ser cliente de Eventop.</p>
       <p style="font-size: 16px; margin-bottom: 20px;">Su solicitud es:${description}</p>
       <p style="font-size: 16px; margin-bottom: 20px;">En breve nos pondremos en contacto contigo.</p>
       <p style="text-align: center; margin-top: 30px;">
         <a href="https://eventop-frontend.vercel.app/admin/users" 
-           style="display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
-    
+          style="display: inline-block; padding: 12px 24px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
+        Autorizar solicitud
   }}
         </a>
       </p>
     `;
-    const htmlContent = generateEmailContent(
-      '📧 Solicitud para ser Cliente',
-      body,
-    );
-  
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: adminsEmails,
-      subject,
-      html: htmlContent,
-    };
-  
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log(`Correo de solicitud de cliente enviado a ${email}`);
-    } catch (error) {
-      console.error(
-        `Error al enviar el correo de solicitud de cliente a ${email}:`,
-        error,
-      );
-    }
+  const htmlContent = generateEmailContent(
+    '📧 Solicitud para ser Cliente',
+    body,
+  );
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: adminsEmails,
+    subject,
+    html: htmlContent,
   };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Correo de solicitud de cliente enviado a ${email}`);
+  } catch (error) {
+    console.error(
+      `Error al enviar el correo de solicitud de cliente a ${email}:`,
+      error,
+    );
+  }
+};
