@@ -37,6 +37,7 @@ import { UpdateUserDto } from './dto/UpdateUser.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from '@app/events/cloudinary.service';
 import { BanUserDto } from './dto/ban-user.dto';
+import { UpdateRoleDto } from './dto/UpdateRoleDto';
 
 @ApiTags('users')
 @ApiBearerAuth('access-token')
@@ -98,6 +99,17 @@ export class UserController {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @Roles(Role.Admin)
+  @UseGuards(AuthGuard('jwt'), RoleGuard)
+  @Put(':id/role')
+  async updateRole(
+    @Param('id') userId: number,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
+    return await this.userService.updateUserRole(userId, updateRoleDto.role);
+  }
+
 
   @Roles(Role.Admin, Role.User, Role.Client)
   @UseGuards(AuthGuard('jwt'), RoleGuard)
