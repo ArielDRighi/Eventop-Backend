@@ -379,5 +379,41 @@ export const sendClientRequest = async (
       `Error al enviar el correo de solicitud de cliente a ${email}:`,
       error,
     );
-  }
-};
+  }}
+  export const aproverRequest = async (
+    email: string,
+    user: string,
+  ) => {
+    const subject = '📧 Solicitud para ser Cliente';
+    const body = `
+      <p style="font-size: 16px; margin-bottom: 20px;">Hola,${user},</p>
+      <p style="font-size: 16px; margin-bottom: 20px;">Nos complace informarte que se ha autorizado su solicitud para ser cliente de Eventop.</p>
+      <p style="text-align: center; margin-top: 30px;">
+        <a href="https://eventop-frontend.vercel.app/client/create-event" 
+          style="display: inline-block; padding: 12px 24px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;">
+        Crear Eventos
+        </a>
+      </p>
+    `;
+    const htmlContent = generateEmailContent(
+      '📧 Solicitud para ser Cliente',
+      body,
+    );
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject,
+      html: htmlContent,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`Correo de solicitud de cliente enviado a ${email}`);
+    } catch (error) {
+      console.error(
+        `Error al enviar el correo de solicitud de cliente a ${email}:`,
+        error,
+      );
+    }}
+
