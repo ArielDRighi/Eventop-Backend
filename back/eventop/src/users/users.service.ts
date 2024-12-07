@@ -19,7 +19,8 @@ import { BannedEmail } from './entities/banned-email.entity';
 import {
   sendBanNotification,
   sendUnbanNotification,
-  sendClientRequest
+  sendClientRequest,
+  aproverRequest
 } from '@app/config/nodeMailer';
 import { RequestClientDto } from './dto/requestClient.Dto';
 
@@ -101,6 +102,7 @@ export class UserService {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
     user.role = role;
+    await aproverRequest(user.email, user.name);
     return await this.userRepository.save(user);
   }
 
@@ -291,4 +293,5 @@ export class UserService {
       throw new Error('No se pudo enviar la solicitud de cliente. Inténtelo más tarde.');
     }
 
-}}
+}
+}
